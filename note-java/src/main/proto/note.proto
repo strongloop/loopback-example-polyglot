@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.ibm.apiconnect.demo.polyglot";
+option java_outer_classname = "NoteMessage";
+
+message Note {
+  int32 id = 1;
+  string title = 2;
+  string content = 3;
+};
+
+message FindByIdRequest {
+  int32 id = 1;
+};
+
+message FindRequest {
+};
+
+message FindResponse {
+  repeated Note notes = 1;
+};
+
+service NoteService {
+  rpc create (Note) returns (Note);
+  rpc findById (FindByIdRequest) returns (Note);
+  rpc find (FindRequest) returns (FindResponse);
+};
+
