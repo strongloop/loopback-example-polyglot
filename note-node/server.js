@@ -1,5 +1,5 @@
 var path = require('path');
-var PROTO_PATH = path.join(__dirname, '../node-common/note.proto');
+var PROTO_PATH = path.join(__dirname, '../note-common/note.proto');
 
 var grpc = require('grpc');
 var proto = grpc.load(PROTO_PATH);
