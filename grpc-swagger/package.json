@@ -1,0 +1,17 @@
+{
+  "name": "grpc-swagger",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Raymond Feng",
+  "license": "MIT",
+  "dependencies": {
+    "debug": "^2.2.0",
+    "js-yaml": "^3.6.1",
+    "protobufjs": "^5.0.1",
+    "swagger-parser": "^3.4.1"
+  }
+}
