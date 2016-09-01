@@ -73,6 +73,9 @@ paths:
           description: Request was successful
           schema:
             $ref: '#/definitions/AccessToken'
+        '400':
+          schema:
+            $ref: '#/definitions/AccessToken'
       deprecated: false
     delete:
       tags:

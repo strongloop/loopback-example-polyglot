@@ -92,9 +92,9 @@ function swagger2proto(swaggerFile, cb) {
         };
         var id = 0;
         op.parameters.forEach(function(p) {
-          var __ret = describeProperty(p);
-          var type = __ret.type;
-          var rule = __ret.rule;
+          var prop = describeProperty(p);
+          var type = prop.type;
+          var rule = prop.rule;
           var param = {
             name: p.name,
             id: ++id,
@@ -104,11 +104,42 @@ function swagger2proto(swaggerFile, cb) {
           reqMsg.fields.push(param);
         });
         json.messages.push(reqMsg);
+
         var resMsg = {
           name: resMsgName,
           options: {},
           fields: []
         };
+        var codes = Object.keys(op.responses);
+        if (codes.length === 1) {
+          var prop = describeProperty(op.responses[codes[0]]);
+          // Skip responses that don't have a type (void)
+          if (prop.type) {
+            resMsg.fields.push({
+              name: 'response_' + codes[0],
+              id: 1,
+              type: prop.type,
+              rule: prop.rule
+            });
+          }
+        } else {
+          resMsg.oneofs = {
+            responses: {fields: []}
+          };
+          id = 0;
+          for (var c in op.responses) {
+            prop = describeProperty(op.responses[c]);
+            if (prop.type) {
+              resMsg.fields.push({
+                oneof: 'responses', // point back to the oneof name
+                name: 'response_' + c,
+                id: ++id,
+                type: prop.type,
+                rule: prop.rule
+              });
+            }
+          }
+        }
         json.messages.push(resMsg);
       }
     }
