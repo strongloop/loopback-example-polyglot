@@ -31,6 +31,134 @@ function describeProperty(p) {
   return {type: type, rule: rule};
 }
 
+function mapDefinitions(swagger, protoObj) {
+  for (var d in swagger.definitions) {
+    if (d === 'x-any') continue;
+    var msg = {
+      name: d,
+      fields: []
+    };
+    var def = swagger.definitions[d];
+    var index = 0;
+    for (var p in def.properties) {
+      var prop = def.properties[p];
+      var desc = describeProperty(prop);
+      var field = {
+        name: p,
+        type: desc.type,
+        rule: desc.rule,
+        id: ++index
+      };
+      if (field.rule === 'optional') {
+        field.rule = '';
+      }
+      msg.fields.push(field);
+    }
+    protoObj.messages.push(msg);
+  }
+  return prop;
+}
+
+function mapOperation(op, protoObj) {
+  var opId = op.operationId;
+  var reqMsgName = (opId + 'Request').replace(/[\.\{\}]/g, '_');
+  var resMsgName = (opId + 'Response').replace(/[\.\{\}]/g, '_');
+
+  var services = [];
+  if (Array.isArray(op.tags) && op.tags.length > 0) {
+    services = op.tags;
+  } else {
+    services = ['Rest']
+  }
+
+  services.forEach(function(s) {
+    var serviceName = s + 'Service';
+    var service;
+    // Match existing services
+    for (var i = 0, n = protoObj.services.length; i < n; i++) {
+      if (protoObj.services[i].name === serviceName) {
+        service = protoObj.services[i];
+        break;
+      }
+    }
+    if (!service) {
+      // Create a new one and add it to proto
+      service = {
+        name: serviceName,
+        options: {},
+        rpc: {}
+      };
+      protoObj.services.push(service);
+    }
+
+    if (opId.indexOf(s + '.') === 0) {
+      opId = opId.substring((s + '.').length);
+    }
+    var opName = opId.replace(/[\.\{\}]/g, '_');
+    service.rpc[opName] = {
+      request: reqMsgName,
+      response: resMsgName,
+      options: {}
+    };
+    var reqMsg = {
+      name: reqMsgName,
+      options: {},
+      fields: []
+    };
+    var id = 0;
+    op.parameters.forEach(function(p) {
+      var prop = describeProperty(p);
+      var type = prop.type;
+      var rule = prop.rule;
+      var param = {
+        name: p.name,
+        id: ++id,
+        rule: rule,
+        type: type
+      };
+      reqMsg.fields.push(param);
+    });
+    protoObj.messages.push(reqMsg);
+
+    var resMsg = {
+      name: resMsgName,
+      options: {},
+      fields: []
+    };
+    var codes = Object.keys(op.responses);
+    if (codes.length === 1) {
+      var prop = describeProperty(op.responses[codes[0]]);
+      // Skip responses that don't have a type (void)
+      if (prop.type) {
+        resMsg.fields.push({
+          name: 'response_' + codes[0],
+          id: 1,
+          type: prop.type,
+          rule: prop.rule
+        });
+      }
+    } else {
+      resMsg.oneofs = {
+        responses: {fields: []}
+      };
+      id = 0;
+      for (var c in op.responses) {
+        prop = describeProperty(op.responses[c]);
+        if (prop.type) {
+          resMsg.fields.push({
+            oneof: 'responses', // point back to the oneof name
+            name: 'response_' + c,
+            id: ++id,
+            type: prop.type,
+            rule: prop.rule
+          });
+        }
+      }
+    }
+    protoObj.messages.push(resMsg);
+  });
+}
+
 function swagger2proto(swaggerFile, cb) {
 
   swaggerParser.bundle(swaggerFile, {}, function(err, swagger) {
@@ -43,104 +171,14 @@ function swagger2proto(swaggerFile, cb) {
       services: [],
       imports: ['google/protobuf/any.proto']
     };
-    for (var d in swagger.definitions) {
-      if (d === 'x-any') continue;
-      var msg = {
-        name: d,
-        fields: []
-      };
-      var def = swagger.definitions[d];
-      var index = 0;
-      for (var p in def.properties) {
-        var prop = def.properties[p];
-        var desc = describeProperty(prop);
-        var field = {
-          name: p,
-          type: desc.type,
-          rule: desc.rule,
-          id: ++index
-        };
-        if (field.rule === 'optional') {
-          field.rule = '';
-        }
-        msg.fields.push(field);
-      }
-      json.messages.push(msg);
-    }
-    var service = {
-      name: 'Swagger',
-      options: {},
-      rpc: {}
-    };
-    json.services.push(service);
+    var prop = mapDefinitions(swagger, json);
+    var services = {};
+
     for (var p in swagger.paths) {
       var apiPath = swagger.paths[p];
       for (var v in apiPath) {
         var op = apiPath[v];
-        var reqMsgName = (op.operationId + 'Request').replace(/[\.\{\}]/g, '$');
-        var resMsgName = (op.operationId + 'Response').replace(/[\.\{\}]/g, '$');
-        var opName = op.operationId.replace(/[\.\{\}]/g, '$');
-        service.rpc[opName] = {
-          request: reqMsgName,
-          response: resMsgName,
-          options: {}
-        };
-        var reqMsg = {
-          name: reqMsgName,
-          options: {},
-          fields: []
-        };
-        var id = 0;
-        op.parameters.forEach(function(p) {
-          var prop = describeProperty(p);
-          var type = prop.type;
-          var rule = prop.rule;
-          var param = {
-            name: p.name,
-            id: ++id,
-            rule: rule,
-            type: type
-          };
-          reqMsg.fields.push(param);
-        });
-        json.messages.push(reqMsg);
-
-        var resMsg = {
-          name: resMsgName,
-          options: {},
-          fields: []
-        };
-        var codes = Object.keys(op.responses);
-        if (codes.length === 1) {
-          var prop = describeProperty(op.responses[codes[0]]);
-          // Skip responses that don't have a type (void)
-          if (prop.type) {
-            resMsg.fields.push({
-              name: 'response_' + codes[0],
-              id: 1,
-              type: prop.type,
-              rule: prop.rule
-            });
-          }
-        } else {
-          resMsg.oneofs = {
-            responses: {fields: []}
-          };
-          id = 0;
-          for (var c in op.responses) {
-            prop = describeProperty(op.responses[c]);
-            if (prop.type) {
-              resMsg.fields.push({
-                oneof: 'responses', // point back to the oneof name
-                name: 'response_' + c,
-                id: ++id,
-                type: prop.type,
-                rule: prop.rule
-              });
-            }
-          }
-        }
-        json.messages.push(resMsg);
+        mapOperation(op, json);
       }
     }
     debug('%s', JSON.stringify(json, null, 2));
@@ -153,6 +191,7 @@ function swagger2proto(swaggerFile, cb) {
   });
 }
 
-swagger2proto(path.join(__dirname, '../note-common/note.yaml'), function(err, proto) {
-  console.log(proto);
-});
+swagger2proto(path.join(__dirname, '../note-common/note.yaml'),
+  function(err, proto) {
+    console.log(proto);
+  });
