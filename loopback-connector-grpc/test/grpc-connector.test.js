@@ -60,7 +60,7 @@ describe('grpc connector', function() {
     var ds, NoteService;
 
     before(function(done) {
-      ds = createDataSource(protoFile);
+      ds = createDataSource(protoFile, true);
       ds.on('connected', function() {
         NoteService = ds.createModel('NoteService', {});
         done();

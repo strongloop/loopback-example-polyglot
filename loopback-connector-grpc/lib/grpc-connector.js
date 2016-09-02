@@ -102,7 +102,8 @@ GRPCConnector.prototype.setupDataAccessObject = function() {
     var methods = utils.discoverMethods(c.service);
     for (var m in methods) {
       debug('Adding method: %s.%s', c.service.name, m);
-      self.DataAccessObject[m] = createMethod(c.client, m, methods[m]);
+      self.DataAccessObject[m] = createMethod(c.client, m, methods[m],
+        self.settings.remotingEnabled);
     }
   });
 
@@ -124,9 +125,10 @@ function createMethod(client, name, method, remoting) {
   var options = method.options || {};
 
   req.children.forEach(function(f) {
+    var type = utils.proto2jsonType(f.type.name, f.repeated);
     fn.accepts.push({
       arg: f.name,
-      type: f.type.name,
+      type: type,
       required: f.required,
       http: { source: 'query' },
     });
@@ -145,11 +147,14 @@ function createMethod(client, name, method, remoting) {
   */
 
   fn.returns = { arg: 'data', type: 'object', root: true };
+
+  options = utils.parseHttpOptions(options);
   fn.http = {
-    verb: 'post',
-    path: options['(loopback.http).post'] || ('/' + method.name),
+    verb: options.method || 'post',
+    path: options.path || ('/' + method.name),
   };
 
+  debug(fn);
   return fn;
 }
 

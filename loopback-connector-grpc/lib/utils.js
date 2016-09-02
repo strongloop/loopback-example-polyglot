@@ -43,5 +43,66 @@ function discoverMethods(service) {
   return methods;
 }
 
+/**
+ * Parse gRPC http annotations
+ * @param {object} options `{"(loopback.http).post": "/notes"}`
+ * @param {string} key annotation name
+ * @returns {method: 'post', path: '/notes'}
+ */
+function parseHttpOptions(options, key) {
+  var properties = {};
+  key = key || 'loopback.http';
+  var prefix = ('(' + key + ').');
+  var verbs = ['get', 'put', 'post', 'delete', 'patch', 'head'];
+  for (var i in options) {
+    if (i.indexOf(prefix) === 0) {
+      var p = i.substring(prefix.length);
+      if (verbs.indexOf(p) !== -1) {
+        properties.path = options[i];
+        properties.method = p;
+      } else {
+        properties[p] = options[i];
+      }
+    }
+  }
+  return properties;
+}
+
+function proto2jsonType(protoType, repeated) {
+  // https://developers.google.com/protocol-buffers/docs/proto3#json
+  var mapping = {
+    message: 'object',
+    enum: 'string',
+    map: 'object',
+    repeated: 'array',
+    bool: 'boolean',
+    string: 'string',
+    bytes: 'string',
+    int32: 'number',
+    fixed32: 'number',
+    uint32: 'number',
+    int64: 'string',
+    fixed64: 'string',
+    uint64: 'string',
+    float: 'number',
+    double: 'number',
+    Any: 'object',
+    Timestamp: 'date',
+    Duration: 'string',
+    Struct: 'object',
+    ListValue: 'array',
+    Value: 'any',
+    NullValue: null
+  };
+  var type = mapping[protoType] || protoType || 'string';
+  if (repeated) {
+    return [type];
+  } else {
+    return type;
+  }
+}
+
 exports.discoverServices = discoverServices;
 exports.discoverMethods = discoverMethods;
+exports.parseHttpOptions = parseHttpOptions;
+exports.proto2jsonType = proto2jsonType;
