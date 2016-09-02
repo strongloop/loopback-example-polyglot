@@ -1,3 +1,3 @@
-var path = require('path');
-var proto2swagger = require('./proto2swagger');
-var json = proto2swagger(path.join(__dirname, '../note-common/note.proto'));
+exports.proto2swagger = require('./lib/proto2swagger');
+exports.swagger2proto = require('./lib/swagger2proto');
+

@@ -4,6 +4,13 @@ var ProtoBuf = require('protobufjs');
 var toProto = require('protobufjs/cli/pbjs/targets/proto');
 var path = require('path');
 
+var OPTION_HTTP = '(loopback.http)';
+
+/**
+ * Describe a property type & rule
+ * @param {object} p Property descriptor
+ * @returns {{type: string, rule: string}}
+ */
 function describeProperty(p) {
   var type = p.type;
   var rule = 'optional';
@@ -31,6 +38,12 @@ function describeProperty(p) {
   return {type: type, rule: rule};
 }
 
+/**
+ * Map Swagger model definitions into proto messages
+ * @param {object} swagger Swagger spec
+ * @param {object} protoObj JSON representation of proto
+ * @returns {*}
+ */
 function mapDefinitions(swagger, protoObj) {
   for (var d in swagger.definitions) {
     if (d === 'x-any') continue;
@@ -59,7 +72,80 @@ function mapDefinitions(swagger, protoObj) {
   return prop;
 }
 
-function mapOperation(op, protoObj) {
+/**
+ * Map request & response to proto messages
+ * @param {object} op Swagger operation object
+ * @param {string} reqMsgName Request message name
+ * @param {string} resMsgName Response message name
+ * @param {object} protoObj JSON representation of proto
+ */
+function mapReqRes(op, reqMsgName, resMsgName, protoObj) {
+  var reqMsg = {
+    name: reqMsgName,
+    options: {},
+    fields: []
+  };
+  var id = 0;
+  op.parameters.forEach(function(p) {
+    var prop = describeProperty(p);
+    var type = prop.type;
+    var rule = prop.rule;
+    var param = {
+      name: p.name,
+      id: ++id,
+      rule: rule,
+      type: type
+    };
+    reqMsg.fields.push(param);
+  });
+  protoObj.messages.push(reqMsg);
+
+  var resMsg = {
+    name: resMsgName,
+    options: {},
+    fields: []
+  };
+  var codes = Object.keys(op.responses);
+  if (codes.length === 1) {
+    // Single response mapped to a fixed message
+    var prop = describeProperty(op.responses[codes[0]]);
+    // Skip responses that don't have a type (void)
+    if (prop.type) {
+      resMsg.fields.push({
+        name: 'response_' + codes[0],
+        id: 1,
+        type: prop.type,
+        rule: prop.rule
+      });
+    }
+  } else {
+    // Multiple responses mapped to oneof (union)
+    resMsg.oneofs = {
+      responses: {fields: []}
+    };
+    id = 0;
+    for (var c in op.responses) {
+      prop = describeProperty(op.responses[c]);
+      if (prop.type) {
+        resMsg.fields.push({
+          oneof: 'responses', // point back to the oneof name
+          name: 'response_' + c,
+          id: ++id,
+          type: prop.type,
+          rule: prop.rule
+        });
+      }
+    }
+  }
+  protoObj.messages.push(resMsg);
+}
+
+/**
+ * Map a swagger operation to proto service rpc method
+ * @param {object} op Swagger operation object
+ * @param {object} protoObj JSON representation of proto
+ */
+function mapOperation(path, verb, op, protoObj) {
   var opId = op.operationId;
   var reqMsgName = (opId + 'Request').replace(/[\.\{\}]/g, '_');
   var resMsgName = (opId + 'Response').replace(/[\.\{\}]/g, '_');
@@ -95,67 +181,17 @@ function mapOperation(op, protoObj) {
       opId = opId.substring((s + '.').length);
     }
     var opName = opId.replace(/[\.\{\}]/g, '_');
+    var options = {};
+
+    options[OPTION_HTTP + '.' + verb] = path;
+    // FIXME: protobuf doesn't allow object options
+    // See https://github.com/googleapis/googleapis/blob/master/google/api/http.proto#L168-L171
     service.rpc[opName] = {
       request: reqMsgName,
       response: resMsgName,
-      options: {}
+      options: options
     };
-    var reqMsg = {
-      name: reqMsgName,
-      options: {},
-      fields: []
-    };
-    var id = 0;
-    op.parameters.forEach(function(p) {
-      var prop = describeProperty(p);
-      var type = prop.type;
-      var rule = prop.rule;
-      var param = {
-        name: p.name,
-        id: ++id,
-        rule: rule,
-        type: type
-      };
-      reqMsg.fields.push(param);
-    });
-    protoObj.messages.push(reqMsg);
-
-    var resMsg = {
-      name: resMsgName,
-      options: {},
-      fields: []
-    };
-    var codes = Object.keys(op.responses);
-    if (codes.length === 1) {
-      var prop = describeProperty(op.responses[codes[0]]);
-      // Skip responses that don't have a type (void)
-      if (prop.type) {
-        resMsg.fields.push({
-          name: 'response_' + codes[0],
-          id: 1,
-          type: prop.type,
-          rule: prop.rule
-        });
-      }
-    } else {
-      resMsg.oneofs = {
-        responses: {fields: []}
-      };
-      id = 0;
-      for (var c in op.responses) {
-        prop = describeProperty(op.responses[c]);
-        if (prop.type) {
-          resMsg.fields.push({
-            oneof: 'responses', // point back to the oneof name
-            name: 'response_' + c,
-            id: ++id,
-            type: prop.type,
-            rule: prop.rule
-          });
-        }
-      }
-    }
-    protoObj.messages.push(resMsg);
+    mapReqRes(op, reqMsgName, resMsgName, protoObj);
   });
 }
 
@@ -178,12 +214,12 @@ function swagger2proto(swaggerFile, cb) {
       var apiPath = swagger.paths[p];
       for (var v in apiPath) {
         var op = apiPath[v];
-        mapOperation(op, json);
+        mapOperation(p, v, op, json);
       }
     }
     debug('%s', JSON.stringify(json, null, 2));
     var builder = ProtoBuf.newBuilder({});
-    var root = path.join(__dirname, './_tmp.proto');
+    var root = path.join(__dirname, '../proto/_tmp.proto');
     builder['import'](json, root);
     var proto = toProto(builder);
     debug(proto);
@@ -191,7 +227,4 @@ function swagger2proto(swaggerFile, cb) {
   });
 }
 
-swagger2proto(path.join(__dirname, '../note-common/note.yaml'),
-  function(err, proto) {
-    console.log(proto);
-  });
+module.exports = swagger2proto;
