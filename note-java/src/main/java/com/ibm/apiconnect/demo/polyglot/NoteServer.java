@@ -1,6 +1,8 @@
 package com.ibm.apiconnect.demo.polyglot;
 
 import java.io.IOException;
+import java.security.interfaces.RSAPrivateKey;
+import java.security.interfaces.RSAPublicKey;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
@@ -18,8 +20,12 @@ public class NoteServer {
 	/* The port on which the server should run */
 	private int port = 50051;
 	private Server server;
+	private RSAPrivateKey privateKey;
+	private RSAPublicKey publicKey;
 
-	private void start() throws IOException {
+	private void start() throws Exception {
+		this.privateKey = JWEUtil.loadPrivateKey();
+		this.publicKey = JWEUtil.loadPublicKey();
 		server = ServerBuilder.forPort(port).addService(new NoteServiceImpl()).build().start();
 		logger.info("Server started, listening on " + port);
 		Runtime.getRuntime().addShutdownHook(new Thread() {
@@ -53,7 +59,7 @@ public class NoteServer {
 	/**
 	 * Main launches the server from the command line.
 	 */
-	public static void main(String[] args) throws IOException, InterruptedException {
+	public static void main(String[] args) throws Exception {
 		final NoteServer server = new NoteServer();
 		server.start();
 		server.blockUntilShutdown();
@@ -66,7 +72,15 @@ public class NoteServer {
 
 		@Override
 		public void create(Note req, StreamObserver<Note> responseObserver) {
-			Note reply = Note.newBuilder(req).setId(++index).build();
+			String content = req.getContent();
+			try {
+				content = JWEUtil.generateJWE(content, publicKey);
+			} catch (Exception e) {
+				responseObserver.onError(e);
+				return;
+			}
+			
+			Note reply = Note.newBuilder(req).setId(++index).setContent(content).build();
 			notes.add(reply);
 			responseObserver.onNext(reply);
 			responseObserver.onCompleted();
