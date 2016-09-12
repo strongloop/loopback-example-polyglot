@@ -33,13 +33,23 @@
 			<version>${grpc.version}</version>
 		</dependency>
 		<dependency>
+			<groupId>com.nimbusds</groupId>
+			<artifactId>nimbus-jose-jwt</artifactId>
+			<version>4.26</version>
+		</dependency>
+		<dependency>
+			<groupId>org.bouncycastle</groupId>
+			<artifactId>bcprov-jdk15on</artifactId>
+			<version>1.55</version>
+		</dependency>
+		<dependency>
 			<groupId>io.zipkin.brave</groupId>
 			<artifactId>brave-grpc</artifactId>
 			<version>3.10.0</version>
 			<exclusions>
 				<exclusion>
-				<groupId>io.grpc</groupId>
-				<artifactId>grpc-core</artifactId>
+					<groupId>io.grpc</groupId>
+					<artifactId>grpc-core</artifactId>
 				</exclusion>
 			</exclusions>
 		</dependency>
