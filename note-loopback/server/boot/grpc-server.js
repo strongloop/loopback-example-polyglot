@@ -45,9 +45,14 @@ module.exports = function(app) {
         find: find
       }
     );
-    server.bind('0.0.0.0:50051', grpc.ServerCredentials.createInsecure());
+    var remotingConfig = app.get('remoting') || {};
+    var grpcConfig = remotingConfig.grpc || {};
+    var host = grpcConfig.host || '0.0.0.0';
+    var port = grpcConfig.port || 50051;
+    var address = host + ':' + port;
+    server.bind(address, grpc.ServerCredentials.createInsecure());
     server.start();
-    console.log('Note service is running at 0.0.0.0:50051');
+    console.log('Note gRPC service is running at %s', address);
   }
 
   main();
