@@ -17,7 +17,10 @@
     "strong-error-handler": "^1.0.1",
     "loopback-datasource-juggler": "^2.39.0",
     "loopback": "^2.22.0",
-    "grpc": "^1.0.0"
+    "grpc": "^1.0.0",
+    "zipkin": "^0.2.6",
+    "zipkin-instrumentation-express": "^0.2.6",
+    "zipkin-transport-http": "^0.2.6"
   },
   "devDependencies": {
     "eslint": "^2.13.1",

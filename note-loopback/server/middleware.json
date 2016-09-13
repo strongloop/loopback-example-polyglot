@@ -3,6 +3,7 @@
     "loopback#favicon": {}
   },
   "initial": {
+    "./middleware/zipkin": {},
     "compression": {},
     "cors": {
       "params": {
