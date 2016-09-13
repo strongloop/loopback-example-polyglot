@@ -1,6 +1,5 @@
 package com.ibm.apiconnect.demo.polyglot;
 
-import java.io.IOException;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.util.ArrayList;
@@ -18,7 +17,7 @@ public class NoteServer {
 	private static final Logger logger = Logger.getLogger(NoteServer.class.getName());
 
 	/* The port on which the server should run */
-	private int port = 50051;
+	private int port = 50052;
 	private Server server;
 	private RSAPrivateKey privateKey;
 	private RSAPublicKey publicKey;
@@ -26,7 +25,8 @@ public class NoteServer {
 	private void start() throws Exception {
 		this.privateKey = JWEUtil.loadPrivateKey();
 		this.publicKey = JWEUtil.loadPublicKey();
-		server = ServerBuilder.forPort(port).addService(new NoteServiceImpl()).build().start();
+		server = ServerBuilder.forPort(port).addService(new NoteServiceImpl()).addService(new EncryptioneServiceImpl())
+				.build().start();
 		logger.info("Server started, listening on " + port);
 		Runtime.getRuntime().addShutdownHook(new Thread() {
 			@Override
@@ -72,15 +72,7 @@ public class NoteServer {
 
 		@Override
 		public void create(Note req, StreamObserver<Note> responseObserver) {
-			String content = req.getContent();
-			try {
-				content = JWEUtil.generateJWE(content, publicKey);
-			} catch (Exception e) {
-				responseObserver.onError(e);
-				return;
-			}
-			
-			Note reply = Note.newBuilder(req).setId(++index).setContent(content).build();
+			Note reply = Note.newBuilder(req).setId(++index).build();
 			notes.add(reply);
 			responseObserver.onNext(reply);
 			responseObserver.onCompleted();
@@ -104,6 +96,39 @@ public class NoteServer {
 		public void find(com.ibm.apiconnect.demo.polyglot.FindRequest request,
 				io.grpc.stub.StreamObserver<com.ibm.apiconnect.demo.polyglot.FindResponse> responseObserver) {
 			FindResponse reply = FindResponse.newBuilder().addAllNotes(notes).build();
+			responseObserver.onNext(reply);
+			responseObserver.onCompleted();
+		}
+	}
+
+	private class EncryptioneServiceImpl extends EncryptionServiceGrpc.EncryptionServiceImplBase {
+
+		@Override
+		public void encrypt(Note req, StreamObserver<Note> responseObserver) {
+			String content = req.getContent();
+			try {
+				content = JWEUtil.generateJWE(content, publicKey);
+			} catch (Exception e) {
+				responseObserver.onError(e);
+				return;
+			}
+
+			Note reply = Note.newBuilder(req).setContent(content).build();
+			responseObserver.onNext(reply);
+			responseObserver.onCompleted();
+		}
+
+		@Override
+		public void decrypt(Note req, StreamObserver<Note> responseObserver) {
+			String content = req.getContent();
+			try {
+				content = JWEUtil.decrypt(content, privateKey);
+			} catch (Exception e) {
+				responseObserver.onError(e);
+				return;
+			}
+
+			Note reply = Note.newBuilder(req).setContent(content).build();
 			responseObserver.onNext(reply);
 			responseObserver.onCompleted();
 		}

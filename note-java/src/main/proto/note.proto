@@ -27,3 +27,8 @@ service NoteService {
   rpc find (FindRequest) returns (FindResponse);
 };
 
+service EncryptionService {
+  rpc encrypt (Note) returns (Note);
+  rpc decrypt (Note) returns (Note);
+}
+

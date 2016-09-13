@@ -12,6 +12,7 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.logging.Logger;
 
 import com.nimbusds.jose.EncryptionMethod;
 import com.nimbusds.jose.JOSEException;
@@ -24,6 +25,7 @@ import com.nimbusds.jwt.EncryptedJWT;
 import com.nimbusds.jwt.JWTClaimsSet;
 
 public class JWEUtil {
+	private static final Logger logger = Logger.getLogger(JWEUtil.class.getName());
 	
 	/**
 	 * Load the private key
@@ -81,7 +83,7 @@ public class JWEUtil {
 	public static String generateJWE(String jti, RSAPublicKey publicKey) throws Exception {
 		// Compose the JWT claims set
 		String iss = "https://openid.net";
-		String sub = "alice";
+		String sub = "apiconnect";
 		List<String> aud = new ArrayList<String>();
 		aud.add("https://app-one.com");
 		aud.add("https://app-two.com");
@@ -119,7 +121,7 @@ public class JWEUtil {
 	 * @throws ParseException
 	 * @throws JOSEException
 	 */
-	public static void decrypt(String jwtString, RSAPrivateKey privateKey) throws ParseException, JOSEException {
+	public static String decrypt(String jwtString, RSAPrivateKey privateKey) throws ParseException, JOSEException {
 		EncryptedJWT jwt;
 		// Parse back
 		jwt = EncryptedJWT.parse(jwtString);
@@ -132,20 +134,22 @@ public class JWEUtil {
 		jwt.decrypt(decrypter);
 
 		// Retrieve JWT claims
-		System.out.println(jwt.getJWTClaimsSet().getIssuer());
-		System.out.println(jwt.getJWTClaimsSet().getSubject());
-		System.out.println(jwt.getJWTClaimsSet().getAudience().size());
-		System.out.println(jwt.getJWTClaimsSet().getExpirationTime());
-		System.out.println(jwt.getJWTClaimsSet().getNotBeforeTime());
-		System.out.println(jwt.getJWTClaimsSet().getIssueTime());
-		System.out.println(jwt.getJWTClaimsSet().getJWTID());
+		logger.info(jwt.getJWTClaimsSet().getIssuer());
+		logger.info(jwt.getJWTClaimsSet().getSubject());
+		logger.info(jwt.getJWTClaimsSet().getAudience().toString());
+		logger.info(jwt.getJWTClaimsSet().getExpirationTime().toString());
+		logger.info(jwt.getJWTClaimsSet().getNotBeforeTime().toString());
+		logger.info(jwt.getJWTClaimsSet().getIssueTime().toString());
+		logger.info(jwt.getJWTClaimsSet().getJWTID());
+		
+		return jwt.getJWTClaimsSet().getJWTID();
 	}
 	
 	public static void main(String[] args) throws Exception {
 		RSAPrivateKey privateKey = JWEUtil.loadPrivateKey();
 		RSAPublicKey publicKey = JWEUtil.loadPublicKey();
 		String jwe = JWEUtil.generateJWE("Hello", publicKey);
-		System.out.println(jwe);
+		logger.info(jwe);
 		JWEUtil.decrypt(jwe, privateKey);
 	}
 }

@@ -14,33 +14,42 @@ import io.grpc.StatusRuntimeException;
 public class NoteClient {
 	private static final Logger logger = Logger.getLogger(NoteClient.class.getName());
 
-	private final ManagedChannel channel;
-	private final NoteServiceGrpc.NoteServiceBlockingStub blockingStub;
+	private final ManagedChannel noteChannel;
+	private final ManagedChannel encryptionChannel;
+	private final NoteServiceGrpc.NoteServiceBlockingStub noteServiceStub;
+	private final EncryptionServiceGrpc.EncryptionServiceBlockingStub encryptionServiceStub;
 
 	/** Construct client connecting to Note server at {@code host:port}. */
-	public NoteClient(String host, int port) {
-		channel = ManagedChannelBuilder.forAddress(host, port)
+	public NoteClient(String noteHost, int notePort, String encryptionHost, int encryptionPort) {
+		noteChannel = ManagedChannelBuilder.forAddress(noteHost, notePort)
 				// Channels are secure by default (via SSL/TLS). For the example
 				// we disable TLS to avoid
 				// needing certificates.
 				.usePlaintext(true).build();
-		blockingStub = NoteServiceGrpc.newBlockingStub(channel);
+		encryptionChannel = ManagedChannelBuilder.forAddress(encryptionHost, encryptionPort)
+				// Channels are secure by default (via SSL/TLS). For the example
+				// we disable TLS to avoid
+				// needing certificates.
+				.usePlaintext(true).build();
+		noteServiceStub = NoteServiceGrpc.newBlockingStub(noteChannel);
+		encryptionServiceStub = EncryptionServiceGrpc.newBlockingStub(encryptionChannel);
 	}
 
 	public void shutdown() throws InterruptedException {
-		channel.shutdown().awaitTermination(5, TimeUnit.SECONDS);
+		noteChannel.shutdown().awaitTermination(5, TimeUnit.SECONDS);
+		encryptionChannel.shutdown().awaitTermination(5, TimeUnit.SECONDS);
 	}
 
-	public void create() {
+	public Note create() {
 		Note request = Note.newBuilder().setTitle("Note1").setContent("My Note").build();
-		Note response;
 		try {
-			response = blockingStub.create(request);
+			Note response = noteServiceStub.create(request);
+			logger.info("Note created: " + response);
+			return response;
 		} catch (StatusRuntimeException e) {
 			logger.log(Level.WARNING, "RPC failed: {0}", e.getStatus());
-			return;
+			return null;
 		}
-		logger.info("Note created: " + response);
 	}
 
 	/**
@@ -48,9 +57,16 @@ public class NoteClient {
 	 * to use in the note.
 	 */
 	public static void main(String[] args) throws Exception {
-		NoteClient client = new NoteClient("localhost", 50051);
+		NoteClient client = new NoteClient("localhost", 50051, "localhost", 50052);
 		try {
-			client.create();
+			Note note = client.create();
+			System.out.println("Created: " + note);
+			if (note != null) {
+				note = client.encryptionServiceStub.encrypt(note);
+				System.out.println("Encrypted: " + note);
+				note = client.encryptionServiceStub.decrypt(note);
+				System.out.println("Decrypted:" + note);
+			}
 		} finally {
 			client.shutdown();
 		}
