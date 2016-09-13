@@ -62,8 +62,10 @@ public class NoteClient {
 			Note note = client.create();
 			System.out.println("Created: " + note);
 			if (note != null) {
-				note = client.encryptionServiceStub.encrypt(note);
-				System.out.println("Encrypted: " + note);
+				if (note.getContent().equals("My Note")) {
+					note = client.encryptionServiceStub.encrypt(note);
+					System.out.println("Encrypted: " + note);
+				}
 				note = client.encryptionServiceStub.decrypt(note);
 				System.out.println("Decrypted:" + note);
 			}

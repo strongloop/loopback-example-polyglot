@@ -61,3 +61,8 @@ service NoteService {
   };
 };
 
+service EncryptionService {
+  rpc encrypt (Note) returns (Note);
+  rpc decrypt (Note) returns (Note);
+};
+

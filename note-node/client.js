@@ -5,10 +5,13 @@ var grpc = require('grpc');
 var proto = grpc.load(PROTO_PATH);
 
 function main() {
-  var client = new proto.NoteService('localhost:50051',
+  var noteClient = new proto.NoteService('localhost:50051',
     grpc.credentials.createInsecure());
 
-  client.create({
+  var encryptionClient = new proto.NoteService('localhost:50052',
+    grpc.credentials.createInsecure());
+
+  noteClient.create({
     id: 1,
     title: 'note1',
     content: 'my note'
@@ -17,8 +20,8 @@ function main() {
       console.error(err);
     } else {
       console.log('Response:', response);
-      client.findById({id: response.id}, console.log);
-      client.find({}, console.log);
+      noteClient.findById({id: response.id}, console.log);
+      noteClient.find({}, console.log);
     }
   });
 }
