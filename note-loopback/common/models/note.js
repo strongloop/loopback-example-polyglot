@@ -12,6 +12,7 @@ module.exports = function(Note) {
     console.log('Encrypting content: %j', ctx.instance);
     encryptionClient.encrypt(ctx.instance.toJSON(), function(err, note) {
       if (err) return next(err);
+      console.log('Encrypted note: %j', note);
       ctx.instance.content = note.content;
       next();
     });
