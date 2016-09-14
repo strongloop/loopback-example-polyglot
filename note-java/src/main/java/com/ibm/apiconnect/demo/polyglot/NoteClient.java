@@ -1,14 +1,13 @@
 package com.ibm.apiconnect.demo.polyglot;
 
+import static com.ibm.apiconnect.demo.polyglot.BraveUtil.ZIPKIN_SERVER_URL;
+import static com.ibm.apiconnect.demo.polyglot.BraveUtil.brave;
+
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.github.kristofa.brave.Brave;
-import com.github.kristofa.brave.EmptySpanCollectorMetricsHandler;
-import com.github.kristofa.brave.Sampler;
 import com.github.kristofa.brave.grpc.BraveGrpcClientInterceptor;
-import com.github.kristofa.brave.http.HttpSpanCollector;
 
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
@@ -18,6 +17,7 @@ import io.grpc.StatusRuntimeException;
  * A simple client that requests a note from the {@link NoteServer}.
  */
 public class NoteClient {
+
 	private static final Logger logger = Logger.getLogger(NoteClient.class.getName());
 
 	private final ManagedChannel noteChannel;
@@ -28,13 +28,13 @@ public class NoteClient {
 	/** Construct client connecting to Note server at {@code host:port}. */
 	public NoteClient(String noteHost, int notePort, String encryptionHost, int encryptionPort) {
 		noteChannel = ManagedChannelBuilder.forAddress(noteHost, notePort)
-				.intercept(new BraveGrpcClientInterceptor(brave("note-client", "http://localhost:9411")))
+				.intercept(new BraveGrpcClientInterceptor(brave("note-client", ZIPKIN_SERVER_URL)))
 				// Channels are secure by default (via SSL/TLS). For the example
 				// we disable TLS to avoid
 				// needing certificates.
 				.usePlaintext(true).build();
 		encryptionChannel = ManagedChannelBuilder.forAddress(encryptionHost, encryptionPort)
-				.intercept(new BraveGrpcClientInterceptor(brave("encryption-client", "http://localhost:9411")))
+				.intercept(new BraveGrpcClientInterceptor(brave("encryption-client", ZIPKIN_SERVER_URL)))
 				// Channels are secure by default (via SSL/TLS). For the example
 				// we disable TLS to avoid
 				// needing certificates.
@@ -80,10 +80,5 @@ public class NoteClient {
 		} finally {
 			client.shutdown();
 		}
-	}
-	
-	private static Brave brave(String serviceName, String zipkinBaseUrl) {
-		return new Brave.Builder(serviceName).traceSampler(Sampler.ALWAYS_SAMPLE)
-				.spanCollector(HttpSpanCollector.create(zipkinBaseUrl, new EmptySpanCollectorMetricsHandler())).build();
 	}
 }

@@ -6,15 +6,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
-import com.github.kristofa.brave.Brave;
-import com.github.kristofa.brave.EmptySpanCollectorMetricsHandler;
-import com.github.kristofa.brave.Sampler;
-import com.github.kristofa.brave.grpc.BraveGrpcServerInterceptor;
-import com.github.kristofa.brave.http.HttpSpanCollector;
-
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
-import io.grpc.ServerInterceptors;
 import io.grpc.ServerServiceDefinition;
 import io.grpc.stub.StreamObserver;
 
@@ -33,10 +26,10 @@ public class NoteServer {
 	private void start() throws Exception {
 		this.privateKey = JWEUtil.loadPrivateKey();
 		this.publicKey = JWEUtil.loadPublicKey();
-		ServerServiceDefinition noteService = ServerInterceptors.intercept(new NoteServiceImpl(),
-				new BraveGrpcServerInterceptor(brave("note-service", "http://localhost:9411")));
-		ServerServiceDefinition encryptionService = ServerInterceptors.intercept(new EncryptioneServiceImpl(),
-				new BraveGrpcServerInterceptor(brave("encryption-service", "http://localhost:9411")));
+		ServerServiceDefinition noteService = BraveUtil.intercept(new NoteServiceImpl(), "note-service",
+				BraveUtil.ZIPKIN_SERVER_URL);
+		ServerServiceDefinition encryptionService = BraveUtil.intercept(new EncryptioneServiceImpl(),
+				"encryption-service", BraveUtil.ZIPKIN_SERVER_URL);
 		server = ServerBuilder.forPort(port).addService(noteService).addService(encryptionService).build().start();
 		logger.info("Server started, listening on " + port);
 		Runtime.getRuntime().addShutdownHook(new Thread() {
@@ -65,11 +58,6 @@ public class NoteServer {
 		if (server != null) {
 			server.awaitTermination();
 		}
-	}
-
-	private static Brave brave(String serviceName, String zipkinBaseUrl) {
-		return new Brave.Builder(serviceName).traceSampler(Sampler.ALWAYS_SAMPLE)
-				.spanCollector(HttpSpanCollector.create(zipkinBaseUrl, new EmptySpanCollectorMetricsHandler())).build();
 	}
 
 	/**
