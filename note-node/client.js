@@ -11,11 +11,13 @@ function main() {
   var encryptionClient = new proto.NoteService('localhost:50052',
     grpc.credentials.createInsecure());
 
+  var metadata = new grpc.Metadata();
+  metadata.set('x-my-header', 'x');
   noteClient.create({
     id: 1,
     title: 'note1',
     content: 'my note'
-  }, function(err, response) {
+  }, metadata, function(err, response) {
     if(err) {
       console.error(err);
     } else {
