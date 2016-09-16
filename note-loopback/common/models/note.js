@@ -1,6 +1,6 @@
 module.exports = function(Note) {
   var path = require('path');
-  var PROTO_PATH = path.join(__dirname, '../../../note-common/note.proto');
+  var PROTO_PATH = path.join(__dirname, '../../proto/note.proto');
 
   var grpc = require('grpc');
   var proto = grpc.load(PROTO_PATH);
