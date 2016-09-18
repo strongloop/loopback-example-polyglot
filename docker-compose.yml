@@ -1,0 +1,35 @@
+version: '2'
+services:
+  note-loopback:
+    build: ./note-loopback
+    ports:
+    - "50051:50051"
+    - "3000:3000"
+    links:
+    - note-java
+    - zipkin
+    networks:
+      app-net:
+        aliases:
+          - note-loopback
+  note-java:
+    build: ./note-java
+    ports:
+      - "50052:50052"
+    links:
+        - zipkin
+    networks:
+      app-net:
+        aliases:
+          - loopback-java
+  zipkin:
+    image: openzipkin/zipkin
+    ports:
+      - "9411:9411"
+    networks:
+      app-net:
+        aliases:
+          - zipkin
+networks:
+  app-net:
+    driver: bridge
