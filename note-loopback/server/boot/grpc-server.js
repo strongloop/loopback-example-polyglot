@@ -41,18 +41,21 @@ module.exports = function(app) {
    */
   function main() {
     var server = new grpc.Server();
-    var zipkinFactory = zipkinInterceptorFactory();
+    var remotingConfig = app.get('remoting') || {};
+    var grpcConfig = remotingConfig.grpc || {};
+    var host = grpcConfig.host || '0.0.0.0';
+    var port = grpcConfig.port || 50051;
+    var address = host + ':' + port;
+    var zipkinServerUrl = grpcConfig.zipkinServerUrl || 'http://localhost:9411';
+
+    var zipkinFactory = zipkinInterceptorFactory({zipkinServerUrl: zipkinServerUrl});
     server.addProtoService(proto.NoteService.service, {
         create: zipkinFactory('NoteService.create', create),
         findById: zipkinFactory('NoteService.findById', findById),
         find: zipkinFactory('NoteService.find', find)
       }
     );
-    var remotingConfig = app.get('remoting') || {};
-    var grpcConfig = remotingConfig.grpc || {};
-    var host = grpcConfig.host || '0.0.0.0';
-    var port = grpcConfig.port || 50051;
-    var address = host + ':' + port;
+
     server.bind(address, grpc.ServerCredentials.createInsecure());
     server.start();
     console.log('Note gRPC service is running at %s', address);
@@ -61,7 +64,8 @@ module.exports = function(app) {
   main();
 };
 
-function zipkinInterceptorFactory() {
+function zipkinInterceptorFactory(options) {
+  options = options || {};
   var zipkin = require('zipkin');
   const {
     ExplicitContext,
@@ -74,9 +78,11 @@ function zipkinInterceptorFactory() {
 
   var HttpLogger = require('zipkin-transport-http').HttpLogger;
 
+  var serverUrl = options.zipkinServerUrl || 'http://localhost:9411';
+  console.log('Zipkin server: %s', serverUrl);
   var recorder = new zipkin.BatchRecorder({
     logger: new HttpLogger({
-      endpoint: 'http://localhost:9411/api/v1/spans'
+      endpoint: serverUrl + '/api/v1/spans'
     })
   });
 
@@ -104,7 +110,7 @@ function zipkinInterceptorFactory() {
     }
   }
 
-  return function intercept(serviceName , fn) {
+  return function intercept(serviceName, fn) {
     return function wrappedServiceMethod(call, cb) {
       var metadata = call.metadata.getMap();
       tracer.scoped(() => {

@@ -3,11 +3,11 @@ services:
   note-loopback:
     build: ./note-loopback
     ports:
-    - "50051:50051"
-    - "3000:3000"
+      - "50051:50051"
+      - "3000:3000"
     links:
-    - note-java
-    - zipkin
+      - note-java
+      - zipkin
     networks:
       app-net:
         aliases:
@@ -17,7 +17,7 @@ services:
     ports:
       - "50052:50052"
     links:
-        - zipkin
+      - zipkin
     networks:
       app-net:
         aliases:

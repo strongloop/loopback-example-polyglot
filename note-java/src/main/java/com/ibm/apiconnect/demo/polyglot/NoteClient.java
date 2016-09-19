@@ -65,7 +65,7 @@ public class NoteClient {
 	 * to use in the note.
 	 */
 	public static void main(String[] args) throws Exception {
-		NoteClient client = new NoteClient("localhost", 50051, "localhost", 50052);
+		NoteClient client = new NoteClient("note-loopback", 50051, "note-java", 50052);
 		try {
 			Note note = client.create();
 			System.out.println("Created: " + note);

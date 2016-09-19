@@ -11,7 +11,7 @@ import io.grpc.ServerInterceptors;
 import io.grpc.ServerServiceDefinition;
 
 public class BraveUtil {
-	public static final String ZIPKIN_SERVER_URL = "http://localhost:9411";
+	public static final String ZIPKIN_SERVER_URL = "http://zipkin:9411";
 
 	public static Brave brave(String serviceName, String zipkinBaseUrl) {
 		return new Brave.Builder(serviceName).traceSampler(Sampler.ALWAYS_SAMPLE)

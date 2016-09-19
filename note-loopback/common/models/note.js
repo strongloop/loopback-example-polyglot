@@ -5,7 +5,8 @@ module.exports = function(Note) {
   var grpc = require('grpc');
   var proto = grpc.load(PROTO_PATH);
 
-  var encryptionClient = new proto.EncryptionService('localhost:50052',
+  var address = Note.settings.encryptionServiceAddress || 'localhost:50052';
+  var encryptionClient = new proto.EncryptionService(address,
     grpc.credentials.createInsecure());
 
   Note.observe('before save', function encryptContent(ctx, next) {

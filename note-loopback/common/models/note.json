@@ -8,5 +8,8 @@
     "content": {
       "type": "string"
     }
+  },
+  "options": {
+    "encryptionServiceAddress": "note-java:50052"
   }
 }

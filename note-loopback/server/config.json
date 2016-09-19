@@ -17,7 +17,12 @@
       "limit": "100kb"
     },
     "cors": false,
-    "handleErrors": false
+    "handleErrors": false,
+    "grpc": {
+      "host": "0.0.0.0",
+      "port": 50051,
+      "zipkinServerUrl": "http://zipkin:9411"
+    }
   },
   "legacyExplorer": false
 }

@@ -3,7 +3,11 @@
     "loopback#favicon": {}
   },
   "initial": {
-    "./middleware/zipkin": {},
+    "./middleware/zipkin": {
+      "params": {
+        "serverUrl": "http://zipkin:9411"
+      }
+    },
     "compression": {},
     "cors": {
       "params": {

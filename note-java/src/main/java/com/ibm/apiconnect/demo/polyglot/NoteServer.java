@@ -126,7 +126,10 @@ public class NoteServer {
 			try {
 				logger.info("Encrypting: " + content);
 				content = JWEUtil.generateJWE(content, publicKey);
-			} catch (Exception e) {
+				logger.info("Result: " + content);
+			} catch (Throwable e) {
+				System.err.println(e);
+				logger.throwing("com.ibm.apiconnect.demo.polyglot.JWEUtil", "generateJWE", e);
 				responseObserver.onError(e);
 				return;
 			}
@@ -142,7 +145,9 @@ public class NoteServer {
 			try {
 				logger.info("Decrypting: " + content);
 				content = JWEUtil.decrypt(content, privateKey);
-			} catch (Exception e) {
+				logger.info("Result: " + content);
+			} catch (Throwable e) {
+				logger.throwing("com.ibm.apiconnect.demo.polyglot.JWEUtil", "decrypt", e);
 				responseObserver.onError(e);
 				return;
 			}

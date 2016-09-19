@@ -5,9 +5,10 @@ module.exports = function(options) {
 
   var HttpLogger = require('zipkin-transport-http').HttpLogger;
 
+  var serverUrl = options.serverUrl || 'http://localhost:9411';
   var recorder = new zipkin.BatchRecorder({
     logger: new HttpLogger({
-      endpoint: 'http://localhost:9411/api/v1/spans'
+      endpoint: serverUrl + '/api/v1/spans'
     })
   });
 
