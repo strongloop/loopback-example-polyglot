@@ -15,10 +15,23 @@ import io.grpc.stub.StreamObserver;
  * Server that manages startup/shutdown of a {@code NoteService} server.
  */
 public class NoteServer {
+
+	public NoteServer() {
+		this(50052, BraveUtil.ZIPKIN_SERVER_URL);
+	}
+
+	public NoteServer(int port, String zipkinServerUrl) {
+		super();
+		this.port = port;
+		this.zipkinServerUrl = zipkinServerUrl;
+	}
+
 	private static final Logger logger = Logger.getLogger(NoteServer.class.getName());
 
 	/* The port on which the server should run */
 	private int port = 50052;
+
+	private String zipkinServerUrl = BraveUtil.ZIPKIN_SERVER_URL;
 	private Server server;
 	private RSAPrivateKey privateKey;
 	private RSAPublicKey publicKey;
@@ -27,9 +40,9 @@ public class NoteServer {
 		this.privateKey = JWEUtil.loadPrivateKey();
 		this.publicKey = JWEUtil.loadPublicKey();
 		ServerServiceDefinition noteService = BraveUtil.intercept(new NoteServiceImpl(), "note-service",
-				BraveUtil.ZIPKIN_SERVER_URL);
+				zipkinServerUrl);
 		ServerServiceDefinition encryptionService = BraveUtil.intercept(new EncryptioneServiceImpl(),
-				"encryption-service", BraveUtil.ZIPKIN_SERVER_URL);
+				"encryption-service", zipkinServerUrl);
 		server = ServerBuilder.forPort(port).addService(noteService).addService(encryptionService).build().start();
 		logger.info("Server started, listening on " + port);
 		Runtime.getRuntime().addShutdownHook(new Thread() {
@@ -111,6 +124,7 @@ public class NoteServer {
 		public void encrypt(Note req, StreamObserver<Note> responseObserver) {
 			String content = req.getContent();
 			try {
+				logger.info("Encrypting: " + content);
 				content = JWEUtil.generateJWE(content, publicKey);
 			} catch (Exception e) {
 				responseObserver.onError(e);
@@ -126,6 +140,7 @@ public class NoteServer {
 		public void decrypt(Note req, StreamObserver<Note> responseObserver) {
 			String content = req.getContent();
 			try {
+				logger.info("Decrypting: " + content);
 				content = JWEUtil.decrypt(content, privateKey);
 			} catch (Exception e) {
 				responseObserver.onError(e);

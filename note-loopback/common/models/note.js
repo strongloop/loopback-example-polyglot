@@ -9,14 +9,14 @@ module.exports = function(Note) {
     grpc.credentials.createInsecure());
 
   Note.observe('before save', function encryptContent(ctx, next) {
-    console.log('Encrypting content: %j', ctx.instance);
+    console.log('Requesting to encrypt content: %s', ctx.instance.content);
     var metadata = new grpc.Metadata();
     encryptionClient.encrypt(ctx.instance.toJSON(), metadata, function(err, note) {
       if (err) {
         console.error(err);
         return next(err);
       }
-      console.log('Encrypted note: %j', note);
+      console.log('Content is now encrypted: %s', note.content);
       ctx.instance.content = note.content;
       next();
     });

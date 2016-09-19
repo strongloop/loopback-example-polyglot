@@ -14,7 +14,6 @@ function main() {
   var metadata = new grpc.Metadata();
   metadata.set('x-my-header', 'x');
   noteClient.create({
-    id: 1,
     title: 'note1',
     content: 'my note'
   }, metadata, function(err, response) {
