@@ -16,9 +16,6 @@ using [LoopBack](http://loopback.io) and [gRPC](http://grpc.io).
 # Running with docker-compose
 
 ```
-$ cd note-java
-$ mvn clean install
-$ cd ..
 $ docker-compose up --build
 ```
 
