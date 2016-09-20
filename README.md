@@ -7,7 +7,6 @@ using [LoopBack](http://loopback.io) and [gRPC](http://grpc.io).
 - loopback-connector-grpc: LoopBack connector for gRPC services
 - note-java: Java implementation of note encryption
 - note-loopback: Sample LoopBack application to demonstrate gRPC integration
-- note-node: Sample Node.js application for gRPC
 
 # Docker Containerization
 - note-loopback (Node.js)
