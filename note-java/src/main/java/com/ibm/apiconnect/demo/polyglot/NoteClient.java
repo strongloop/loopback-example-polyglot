@@ -3,15 +3,20 @@ package com.ibm.apiconnect.demo.polyglot;
 import static com.ibm.apiconnect.demo.polyglot.BraveUtil.ZIPKIN_SERVER_URL;
 import static com.ibm.apiconnect.demo.polyglot.BraveUtil.brave;
 
+import java.io.InputStream;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import javax.net.ssl.SSLException;
 
 import com.github.kristofa.brave.grpc.BraveGrpcClientInterceptor;
 
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.StatusRuntimeException;
+import io.grpc.netty.GrpcSslContexts;
+import io.grpc.netty.NettyChannelBuilder;
 
 /**
  * A simple client that requests a note from the {@link NoteServer}.
@@ -25,20 +30,23 @@ public class NoteClient {
 	private final NoteServiceGrpc.NoteServiceBlockingStub noteServiceStub;
 	private final EncryptionServiceGrpc.EncryptionServiceBlockingStub encryptionServiceStub;
 
-	/** Construct client connecting to Note server at {@code host:port}. */
-	public NoteClient(String noteHost, int notePort, String encryptionHost, int encryptionPort) {
+	/** Construct client connecting to Note server at {@code host:port}. 
+	 * @throws SSLException */
+	public NoteClient(String noteHost, int notePort, String encryptionHost, int encryptionPort) throws SSLException {
+		InputStream keyCertChainInputStream = NoteClient.class.getResourceAsStream("/grpc.crt");
 		noteChannel = ManagedChannelBuilder.forAddress(noteHost, notePort)
 				.intercept(new BraveGrpcClientInterceptor(brave("note-client", ZIPKIN_SERVER_URL)))
 				// Channels are secure by default (via SSL/TLS). For the example
 				// we disable TLS to avoid
 				// needing certificates.
 				.usePlaintext(true).build();
-		encryptionChannel = ManagedChannelBuilder.forAddress(encryptionHost, encryptionPort)
+		encryptionChannel = NettyChannelBuilder.forAddress(encryptionHost, encryptionPort)
 				.intercept(new BraveGrpcClientInterceptor(brave("encryption-client", ZIPKIN_SERVER_URL)))
 				// Channels are secure by default (via SSL/TLS). For the example
 				// we disable TLS to avoid
 				// needing certificates.
-				.usePlaintext(true).build();
+				.sslContext(GrpcSslContexts.forClient().trustManager(keyCertChainInputStream).build())
+				.build();
 		noteServiceStub = NoteServiceGrpc.newBlockingStub(noteChannel);
 		encryptionServiceStub = EncryptionServiceGrpc.newBlockingStub(encryptionChannel);
 	}

@@ -1,15 +1,22 @@
 package com.ibm.apiconnect.demo.polyglot;
 
+import java.io.InputStream;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
+import javax.net.ssl.SSLException;
+
 import io.grpc.Server;
-import io.grpc.ServerBuilder;
 import io.grpc.ServerServiceDefinition;
+import io.grpc.netty.GrpcSslContexts;
+import io.grpc.netty.NettyServerBuilder;
 import io.grpc.stub.StreamObserver;
+import io.netty.handler.ssl.ClientAuth;
+import io.netty.handler.ssl.SslContext;
+import io.netty.handler.ssl.SslContextBuilder;
 
 /**
  * Server that manages startup/shutdown of a {@code NoteService} server.
@@ -43,7 +50,9 @@ public class NoteServer {
 				zipkinServerUrl);
 		ServerServiceDefinition encryptionService = BraveUtil.intercept(new EncryptioneServiceImpl(),
 				"encryption-service", zipkinServerUrl);
-		server = ServerBuilder.forPort(port).addService(noteService).addService(encryptionService).build().start();
+		SslContext sslContext = configureSSLContext();
+		server = NettyServerBuilder.forPort(port).sslContext(sslContext).addService(noteService)
+				.addService(encryptionService).build().start();
 		logger.info("Server started, listening on " + port);
 		Runtime.getRuntime().addShutdownHook(new Thread() {
 			@Override
@@ -55,6 +64,20 @@ public class NoteServer {
 				System.err.println("*** server shut down");
 			}
 		});
+	}
+
+	public SslContext configureSSLContext() throws SSLException {
+		InputStream keyCertChainInputStream = NoteServer.class.getResourceAsStream("/note-java.crt");
+		// Netty requires pkcs#8
+		InputStream keyInputStream = NoteServer.class.getResourceAsStream("/note-java.pfx");
+		InputStream trustCertCollectionInputStream = NoteServer.class.getResourceAsStream("/gprc.crt");
+
+		SslContext sslContext = GrpcSslContexts
+				.configure(SslContextBuilder.forServer(keyCertChainInputStream, keyInputStream))
+				.trustManager(trustCertCollectionInputStream)
+				.clientAuth(ClientAuth.OPTIONAL)
+				.build();
+		return sslContext;
 	}
 
 	private void stop() {
