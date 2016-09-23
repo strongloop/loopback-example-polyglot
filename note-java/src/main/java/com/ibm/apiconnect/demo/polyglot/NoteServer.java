@@ -46,6 +46,7 @@ public class NoteServer {
 	private void start() throws Exception {
 		this.privateKey = JWEUtil.loadPrivateKey();
 		this.publicKey = JWEUtil.loadPublicKey();
+		// Please note that Brave does NOT create a child span at the moment
 		ServerServiceDefinition noteService = BraveUtil.intercept(new NoteServiceImpl(), "note-service",
 				zipkinServerUrl);
 		ServerServiceDefinition encryptionService = BraveUtil.intercept(new EncryptioneServiceImpl(),

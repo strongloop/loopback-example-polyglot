@@ -69,8 +69,8 @@ function beginTrace(tracer, metadata) {
       const flags = readHeader(metadata, Header.Flags).flatMap(stringToIntOption).getOrElse(0);
       const id = new TraceId({
         traceId,
-        parentId: parentSpanId,
-        spanId: sid,
+        parentId: spanId,
+        spanId: tracer.createChildId().spanId,
         sampled: sampled.map(stringToBoolean),
         flags
       });
