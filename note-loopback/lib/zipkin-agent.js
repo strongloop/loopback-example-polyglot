@@ -9,6 +9,8 @@ const {
   TraceId
 } = zipkin;
 
+var grpc = require('grpc');
+
 var HttpLogger = require('zipkin-transport-http').HttpLogger;
 
 function createTracer(options) {
@@ -18,7 +20,7 @@ function createTracer(options) {
     logger: new HttpLogger({
       endpoint: serverUrl + '/api/v1/spans'
     }),
-    timeout: options.timeout || 60 * 1000000
+    timeout: options.timeout == null ? 60 * 1000000 : options.timeout
   });
 
   var ctxImpl = new ExplicitContext();
@@ -57,7 +59,7 @@ function stringToIntOption(str) {
 }
 
 function beginTrace(tracer, metadata) {
-  console.log('Metadata: ', metadata);
+  console.log('Metadata for tracing: ', metadata);
   if (containsRequiredHeaders(metadata)) {
     const spanId = readHeader(metadata, Header.SpanId);
     spanId.ifPresent(sid => {
@@ -88,6 +90,7 @@ function beginTrace(tracer, metadata) {
       tracer.setId(idWithFlags);
     }
   }
+  return tracer.id;
 }
 
 function serverInterceptorFactory(options) {
@@ -126,10 +129,49 @@ function serverInterceptorFactory(options) {
   };
 }
 
+function traceClient(serviceName, options, headers, fn, cb) {
+
+  options = options || {zipkinServerUrl: 'http://zipkin:9411'};
+  var metadata = new grpc.Metadata();
+
+  var tracer = createTracer(options);
+  beginTrace(tracer, headers);
+  var id = tracer.id;
+
+  metadata.set(Header.TraceId, id.traceId);
+  metadata.set(Header.SpanId, id.spanId);
+  metadata.set(Header.ParentSpanId, id.parentId);
+  if (id.sampled.present) {
+    metadata.set(Header.Sampled, '1');
+  } else {
+    metadata.set(Header.Sampled, '0');
+  }
+  metadata.set(Header.Flags, id.flags.toString());
+
+  tracer.scoped(function() {
+    tracer.recordServiceName(serviceName);
+    tracer.recordAnnotation(new Annotation.ClientSend());
+
+    if (id.flags !== 0 && id.flags != null) {
+      tracer.recordBinary(Header.Flags, id.flags.toString());
+    }
+
+    fn(metadata, function() {
+      var args = [].slice.call(arguments);
+      tracer.scoped(() => {
+        tracer.setId(id);
+        tracer.recordAnnotation(new Annotation.ClientRecv());
+        cb.apply(this, args);
+      });
+    });
+  });
+}
+
 module.exports = {
   createTracer,
   beginTrace,
   serverInterceptorFactory,
   HttpHeaders: Header,
-  zipkin
+  zipkin,
+  traceClient
 };

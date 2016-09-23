@@ -12,7 +12,8 @@ module.exports = function(app) {
    */
   function create(call, callback) {
     var note = call.request;
-    app.models.Note.create(note, function(err, result) {
+    var options = call.metadata.getMap();
+    app.models.Note.create(note, options, function(err, result) {
       if (err) return callback(err);
       callback(null, result.toJSON());
     });
@@ -20,15 +21,17 @@ module.exports = function(app) {
 
   function findById(call, callback) {
     var id = call.request.id;
-    app.models.Note.findById(id, function(err, result) {
+    var options = call.metadata.getMap();
+    app.models.Note.findById(id, options, function(err, result) {
       if (err) return callback(err);
       callback(null, result.toJSON());
     });
   }
 
   function find(call, callback) {
+    var options = call.metadata.getMap();
     var filter = (call.request && call.request.filter) || {};
-    app.models.Note.find(filter, function(err, values) {
+    app.models.Note.find(filter, options, function(err, values) {
       callback(err, {
         notes: values.map(function(v) {
           return v.toJSON();
@@ -53,9 +56,9 @@ module.exports = function(app) {
     var zipkinFactory = zipkinAgent.serverInterceptorFactory(
       {zipkinServerUrl: zipkinServerUrl});
     server.addProtoService(proto.NoteService.service, {
-        create: zipkinFactory('NoteService.create', create),
-        findById: zipkinFactory('NoteService.findById', findById),
-        find: zipkinFactory('NoteService.find', find)
+        create: zipkinFactory('note-loopback.create', create),
+        findById: zipkinFactory('note-loopback.findById', findById),
+        find: zipkinFactory('note-loopback.find', find)
       }
     );
 

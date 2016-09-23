@@ -16,60 +16,40 @@ function main() {
 
   var encryptionClient = new proto.NoteService('localhost:50052', ssl);
 
-  var tracer = zipkinAgent.createTracer({zipkinServerUrl: 'http://localhost:9411', timeout: 1});
-  var metadata = new grpc.Metadata();
-  zipkinAgent.beginTrace(tracer, metadata.getMap());
-  const id = tracer.id;
-
-  /*
-   TraceId: 'X-B3-TraceId',
-   SpanId: 'X-B3-SpanId',
-   ParentSpanId: 'X-B3-ParentSpanId',
-   Sampled: 'X-B3-Sampled',
-   Flags: 'X-B3-Flags'
-   */
-
-  var Header = zipkinAgent.zipkin.HttpHeaders;
-  var Annotation = zipkinAgent.zipkin.Annotation;
-
-  metadata.set(Header.TraceId, id.traceId);
-  metadata.set(Header.SpanId, id.spanId);
-  metadata.set(Header.ParentSpanId, id.parentId);
-  if (id.sampled === zipkinAgent.zipkin.option.Some) {
-    metadata.set(Header.Sampled, '1');
-  } else {
-    metadata.set(Header.Sampled, '0');
-  }
-  metadata.set(Header.Flags, id.flags.toString());
-
-  tracer.scoped(() => {
-    tracer.recordServiceName('note-loopback-client');
-    tracer.recordAnnotation(new Annotation.ClientSend());
-
-    if (id.flags !== 0 && id.flags != null) {
-      tracer.recordBinary(Header.Flags, id.flags.toString());
-    }
-
-    var note = {
-      title: 'note1',
-      content: 'my note'
-    };
-
-    noteClient.create(note, metadata, function(err, response) {
-      tracer.scoped(() => {
-        // tracer.recordBinary('http.status_code', res.statusCode.toString());
-        tracer.recordAnnotation(new Annotation.ClientRecv());
-        if (err) {
-          console.error(err);
-        } else {
-          console.log('Response:', response);
-          noteClient.findById({id: response.id}, console.log);
-          noteClient.find({}, console.log);
-          setTimeout(console.log, 500);
-        }
-      });
+  zipkinAgent.traceClient('note-loopback-client',
+    {zipkinServerUrl: 'http://localhost:9411'}, {},
+    function(metadata, done) {
+      var note = {
+        title: 'note1',
+        content: 'my note'
+      };
+      noteClient.create(note, metadata, done);
+    }, function(err, response) {
+      if (err) {
+        console.error(err);
+      } else {
+        console.log('Response:', response);
+        noteClient.findById({id: response.id}, function(err, note) {
+          if (err) {
+            console.error(err);
+            return;
+          }
+          console.log('Note found: ', note);
+          noteClient.find({}, function(err, notes) {
+            if (err) {
+              console.error(err);
+              return;
+            }
+            console.log('Notes found: ', notes);
+            setTimeout(function() {
+              // Wait for 2 seconds so that tracing information can be written
+              // out as the timer has 1 sec interval
+              console.log('Done');
+            }, 2000);
+          });
+        });
+      }
     });
-  });
 }
 
 main();
