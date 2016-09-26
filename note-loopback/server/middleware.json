@@ -5,7 +5,7 @@
   "initial": {
     "./middleware/zipkin": {
       "params": {
-        "serverUrl": "http://zipkin:9411"
+        "zipkinServerUrl": "http://zipkin:9411"
       }
     },
     "compression": {},
