@@ -21,7 +21,7 @@ services:
     networks:
       app-net:
         aliases:
-          - loopback-java
+          - note-java
   zipkin:
     image: openzipkin/zipkin
     ports:

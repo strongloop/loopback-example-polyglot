@@ -84,6 +84,7 @@ public class NoteServer {
 	private void stop() {
 		if (server != null) {
 			server.shutdown();
+			BraveUtil.shutdown();
 		}
 	}
 

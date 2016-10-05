@@ -54,6 +54,7 @@ public class NoteClient {
 	public void shutdown() throws InterruptedException {
 		noteChannel.shutdown().awaitTermination(5, TimeUnit.SECONDS);
 		encryptionChannel.shutdown().awaitTermination(5, TimeUnit.SECONDS);
+		BraveUtil.shutdown();
 	}
 
 	public Note create() {
