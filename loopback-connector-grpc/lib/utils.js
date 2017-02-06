@@ -92,7 +92,7 @@ function proto2jsonType(protoType, repeated) {
     Struct: 'object',
     ListValue: 'array',
     Value: 'any',
-    NullValue: null
+    NullValue: null,
   };
   var type = mapping[protoType] || protoType || 'string';
   if (repeated) {
