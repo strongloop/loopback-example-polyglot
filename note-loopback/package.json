@@ -8,24 +8,24 @@
     "posttest": "npm run lint && nsp check"
   },
   "dependencies": {
-    "compression": "^1.0.3",
-    "cors": "^2.5.2",
-    "helmet": "^1.3.0",
-    "loopback-boot": "^2.6.5",
-    "loopback-component-explorer": "^2.4.0",
-    "serve-favicon": "^2.0.1",
-    "strong-error-handler": "^1.0.1",
-    "loopback-datasource-juggler": "^2.39.0",
-    "loopback": "^2.22.0",
-    "grpc": "^1.0.0",
-    "zipkin": "^0.2.6",
-    "zipkin-instrumentation-express": "^0.2.6",
-    "zipkin-transport-http": "^0.2.6"
+    "compression": "^1.6.2",
+    "cors": "^2.8.1",
+    "helmet": "^3.4.0",
+    "loopback-boot": "^2.23.0",
+    "loopback-component-explorer": "^4.1.0",
+    "serve-favicon": "^2.3.2",
+    "strong-error-handler": "^1.2.1",
+    "loopback-datasource-juggler": "^3.2.0",
+    "loopback": "^3.2.1",
+    "grpc": "^1.1.1",
+    "zipkin": "^0.5.1",
+    "zipkin-instrumentation-express": "^0.5.1",
+    "zipkin-transport-http": "^0.5.1"
   },
   "devDependencies": {
-    "eslint": "^2.13.1",
-    "eslint-config-loopback": "^4.0.0",
-    "nsp": "^2.1.0"
+    "eslint": "^3.15.0",
+    "eslint-config-loopback": "^8.0.0",
+    "nsp": "^2.6.2"
   },
   "repository": {
     "type": "",
