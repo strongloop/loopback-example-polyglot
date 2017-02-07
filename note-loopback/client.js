@@ -8,7 +8,7 @@ var fs = require('fs');
 var zipkinAgent = require('./lib/zipkin-agent');
 
 function main() {
-  var noteClient = new proto.NoteService('localhost:50051',
+  var noteClient = new proto.note.NoteService('localhost:50051',
     grpc.credentials.createInsecure());
 
   var rootCerts = fs.readFileSync(path.join(__dirname, './bin/grpc.crt'));

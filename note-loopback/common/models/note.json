@@ -11,6 +11,7 @@
   },
   "options": {
     "zipkinServerUrl": "http://zipkin:9411",
-    "encryptionServiceAddress": "note-java:50052"
+    "encryptionServiceAddress": "note-java:50052",
+    "translationServiceAddress": "note-swift:50053"
   }
 }

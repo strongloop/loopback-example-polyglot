@@ -9,5 +9,5 @@ COPY . /usr/src/note-swift
 
 RUN make
 
-EXPOSE 8081 8443
+EXPOSE 50053
 CMD [ ".build/debug/note-swift", "serve" ]
