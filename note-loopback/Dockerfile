@@ -12,4 +12,4 @@ RUN npm install
 COPY . /usr/src/note-loopback
 
 EXPOSE 3000 50051
-CMD [ "npm", "start" ]
+CMD [ "node", "." ]
