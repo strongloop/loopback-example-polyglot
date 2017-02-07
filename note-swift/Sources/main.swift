@@ -38,13 +38,13 @@ if server {
     print("Starting secure server")
     let certificateURL = URL(fileURLWithPath:"grpc.crt")
     let keyURL = URL(fileURLWithPath:"grpc.key")
-    noteServer = Note_TranslationServiceServer(address:"localhost:50053",
+    noteServer = Note_TranslationServiceServer(address:"0.0.0.0:50053",
                                  certificateURL:certificateURL,
                                  keyURL:keyURL,
                                  provider:noteProvider)
   } else {
     print("Starting insecure server")
-    noteServer = Note_TranslationServiceServer(address:"localhost:50053",
+    noteServer = Note_TranslationServiceServer(address:"0.0.0.0:50053",
                                  provider:noteProvider)
   }
   noteServer.start()

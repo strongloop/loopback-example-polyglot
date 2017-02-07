@@ -11,12 +11,16 @@ module.exports = function(Note) {
   var rootCerts = fs.readFileSync(path.join(__dirname, '../../bin/grpc.crt'));
   var ssl = grpc.credentials.createSsl(rootCerts);
   var address = Note.settings.encryptionServiceAddress || 'localhost:50052';
+  console.log('Encryption service address: %s', address);
   var encryptionClient = new proto.note.EncryptionService(address,
     ssl // grpc.credentials.createInsecure()
   );
 
+  var translationServiceAddress = Note.settings.translationServiceAddress ||
+    'localhost:50053';
+  console.log('Translation service address: %s', translationServiceAddress);
   var translationClient = new proto.note.TranslationService(
-    Note.settings.translationServiceAddress || 'localhost:50053',
+    translationServiceAddress,
     grpc.credentials.createInsecure()
   );
 

@@ -14,7 +14,7 @@ function main() {
   var rootCerts = fs.readFileSync(path.join(__dirname, './bin/grpc.crt'));
   var ssl = grpc.credentials.createSsl(rootCerts);
 
-  var encryptionClient = new proto.NoteService('localhost:50052', ssl);
+  var encryptionClient = new proto.note.NoteService('localhost:50052', ssl);
 
   zipkinAgent.traceClient('note-loopback-client',
     {zipkinServerUrl: 'http://localhost:9411'}, {},
