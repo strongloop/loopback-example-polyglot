@@ -55,7 +55,7 @@ module.exports = function(app) {
 
     var zipkinFactory = zipkinAgent.serverInterceptorFactory(
       {zipkinServerUrl: zipkinServerUrl});
-    server.addProtoService(proto.NoteService.service, {
+    server.addProtoService(proto.note.NoteService.service, {
         create: zipkinFactory('note-loopback.create', create),
         findById: zipkinFactory('note-loopback.findById', findById),
         find: zipkinFactory('note-loopback.find', find)

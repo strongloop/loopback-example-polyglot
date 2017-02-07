@@ -1,5 +1,7 @@
 syntax = "proto3";
 
+package note;
+
 option java_multiple_files = true;
 option java_package = "com.ibm.apiconnect.demo.polyglot";
 option java_outer_classname = "NoteMessage";
@@ -64,5 +66,9 @@ service NoteService {
 service EncryptionService {
   rpc encrypt (Note) returns (Note);
   rpc decrypt (Note) returns (Note);
+};
+
+service TranslationService {
+  rpc translate (Note) returns (Note);
 };
 

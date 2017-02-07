@@ -22,6 +22,16 @@ services:
       app-net:
         aliases:
           - note-java
+  note-swift:
+      build: ./note-swift
+      ports:
+        - "50053:50053"
+      links:
+        - zipkin
+      networks:
+        app-net:
+          aliases:
+            - note-swift
   zipkin:
     image: openzipkin/zipkin
     ports:

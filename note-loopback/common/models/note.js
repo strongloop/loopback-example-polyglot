@@ -11,8 +11,13 @@ module.exports = function(Note) {
   var rootCerts = fs.readFileSync(path.join(__dirname, '../../bin/grpc.crt'));
   var ssl = grpc.credentials.createSsl(rootCerts);
   var address = Note.settings.encryptionServiceAddress || 'localhost:50052';
-  var encryptionClient = new proto.EncryptionService(address,
+  var encryptionClient = new proto.note.EncryptionService(address,
     ssl // grpc.credentials.createInsecure()
+  );
+
+  var translationClient = new proto.note.TranslationService(
+    Note.settings.translationServiceAddress || 'localhost:50053',
+    grpc.credentials.createInsecure()
   );
 
   Note.observe('before save', function encryptContent(ctx, next) {
@@ -21,16 +26,28 @@ module.exports = function(Note) {
     zipkinAgent.traceClient('note-loopback.encrypt',
       {zipkinServerUrl: Note.settings.zipkinServerUrl}, ctx.options,
       function(metadata, done) {
-        encryptionClient.encrypt(ctx.instance.toJSON(), metadata, done)
+        translationClient.translate(ctx.instance.toJSON(), metadata,
+          function(err, note) {
+            if (err) {
+              return done(err);
+            }
+            console.log('Content is now translated: %s', note.content);
+            encryptionClient.encrypt(note, metadata,
+              function(err, note) {
+                if (err) {
+                  return done(err);
+                }
+                console.log('Content is now encrypted: %s', note.content);
+                ctx.instance.content = note.content;
+                done();
+              });
+          });
       }, function(err, note) {
         if (err) {
           console.error(err);
           return next(err);
         }
-        console.log('Content is now encrypted: %s', note.content);
-        ctx.instance.content = note.content;
         next();
       });
   });
-
 };
