@@ -20,14 +20,7 @@ message Filter {
 };
 */
 
-message Note {
-  option(loopback.model) = {
-    name: "Note"
-  };
-  int32 id = 1;
-  string title = 2;
-  string content = 3;
-};
+import "note-model.proto";
 
 message FindByIdRequest {
   int32 id = 1;
@@ -61,14 +54,5 @@ service NoteService {
   option (loopback.http) = {
     description: "Note Service"
   };
-};
-
-service EncryptionService {
-  rpc encrypt (Note) returns (Note);
-  rpc decrypt (Note) returns (Note);
-};
-
-service TranslationService {
-  rpc translate (Note) returns (Note);
 };
 

@@ -8,7 +8,7 @@
     "name": "grpc-encryption",
     "connector": "loopback-connector-grpc",
     "lazyConnect": false,
-    "spec": "proto/note.proto",
+    "spec": "proto/encryption.proto",
     "security": {
       "rootCerts": "bin/grpc.crt"
     }
@@ -18,6 +18,6 @@
     "name": "grpc-translation",
     "connector": "loopback-connector-grpc",
     "lazyConnect": false,
-    "spec": "proto/note.proto"
+    "spec": "proto/translation.proto"
   }
 }

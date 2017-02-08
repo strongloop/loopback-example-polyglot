@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package note;
+
+import "note-model.proto";
+
+service EncryptionService {
+  rpc encrypt (Note) returns (Note);
+  rpc decrypt (Note) returns (Note);
+};
+

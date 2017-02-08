@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+package note;
+
+import "note-model.proto";
+
+service TranslationService {
+  rpc translate (Note) returns (Note);
+};
+
