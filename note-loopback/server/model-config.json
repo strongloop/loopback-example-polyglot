@@ -34,5 +34,13 @@
   },
   "Note": {
     "dataSource": "db"
+  },
+  "EncryptionClient": {
+    "dataSource": "grpc-encryption",
+    "public": false
+  },
+  "TranslationClient": {
+    "dataSource": "grpc-translation",
+    "public": false
   }
 }

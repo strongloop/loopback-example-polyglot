@@ -2,5 +2,22 @@
   "db": {
     "name": "db",
     "connector": "memory"
+  },
+  "grpc-encryption": {
+    "url": "note-java:50052",
+    "name": "grpc-encryption",
+    "connector": "loopback-connector-grpc",
+    "lazyConnect": false,
+    "spec": "proto/note.proto",
+    "security": {
+      "rootCerts": "bin/grpc.crt"
+    }
+  },
+  "grpc-translation": {
+    "url": "note-swift:50053",
+    "name": "grpc-translation",
+    "connector": "loopback-connector-grpc",
+    "lazyConnect": false,
+    "spec": "proto/note.proto"
   }
 }

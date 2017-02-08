@@ -1,5 +1,9 @@
 {
   "name": "Note",
+  "options": {
+    "zipkinServerUrl": "http://zipkin:9411",
+    "forceId": false
+  },
   "properties": {
     "title": {
       "type": "string",
@@ -9,9 +13,8 @@
       "type": "string"
     }
   },
-  "options": {
-    "zipkinServerUrl": "http://zipkin:9411",
-    "encryptionServiceAddress": "note-java:50052",
-    "translationServiceAddress": "note-swift:50053"
-  }
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {}
 }
