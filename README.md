@@ -9,7 +9,7 @@ using [LoopBack](http://loopback.io) and [gRPC](http://grpc.io).
   - note-loopback: Sample LoopBack application to demonstrate gRPC integration
 - Tools  
   - grpc-swagger: Generate swagger spec from gRPC proto document and vice versa
-  - loopback-connector-grpc: LoopBack connector for gRPC services
+  - [loopback-connector-grpc](https://github.com/strongloop/loopback-connector-grpc): LoopBack connector for gRPC services
 
 # Docker Containerization
 - note-loopback (Node.js)
