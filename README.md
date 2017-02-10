@@ -39,3 +39,12 @@ or
 $ cd note-java
 $ java -cp ./target/note-1.0.0.jar com.ibm.apiconnect.demo.polyglot.NoteClient
 ```
+
+# Running as local Kubernetes (minikube)
+ 
+See https://github.com/kubernetes/minikube
+
+````
+cd kubernetes
+./start-k8s.sh
+```

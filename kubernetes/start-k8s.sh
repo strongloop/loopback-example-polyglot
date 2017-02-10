@@ -8,5 +8,6 @@ kubectl create -f note-swift-service.yml
 kubectl create -f note-java-service.yml
 kubectl create -f note-loopback-service.yml
 kubectl create -f note-zipkin-service.yml
+minikube dashboard
 kubectl service note-loopback
 
