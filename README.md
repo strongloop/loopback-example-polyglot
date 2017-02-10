@@ -42,9 +42,9 @@ $ java -cp ./target/note-1.0.0.jar com.ibm.apiconnect.demo.polyglot.NoteClient
 
 # Running as local Kubernetes (minikube)
  
-See https://github.com/kubernetes/minikube
+Please follow instructions at https://github.com/kubernetes/minikube to install `minikube` and `kubectl` commands.
 
 ````
 cd kubernetes
-./start-k8s.sh
+./create-k8s.sh
 ```
