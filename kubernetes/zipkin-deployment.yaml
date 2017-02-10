@@ -1,0 +1,23 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  name: zipkin
+spec:
+  replicas: 1
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        service: zipkin
+    spec:
+      containers:
+      - image: openzipkin/zipkin
+        name: zipkin
+        ports:
+        - containerPort: 9411
+          protocol: TCP
+        resources: {}
+      restartPolicy: Always
+status: {}

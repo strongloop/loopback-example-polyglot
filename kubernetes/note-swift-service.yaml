@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: null
+  labels:
+    service: note-swift
+  name: note-swift
+spec:
+  ports:
+  - name: "50053"
+    port: 50053
+    protocol: TCP
+    targetPort: 50053
+  selector:
+    service: note-swift
+status:
+  loadBalancer: {}
