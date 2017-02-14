@@ -33,7 +33,7 @@
     "public": false
   },
   "Note": {
-    "dataSource": "db"
+    "dataSource": "note-mongo"
   },
   "EncryptionClient": {
     "dataSource": "grpc-encryption",

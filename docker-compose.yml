@@ -1,12 +1,14 @@
-version: '2'
+version: '3'
 services:
   note-loopback:
     build: ./note-loopback
+    image: raymondfeng/note-loopback
     ports:
       - "50051:50051"
       - "3000:3000"
     links:
       - note-java
+      - note-mongo
       - zipkin
     networks:
       app-net:
@@ -14,6 +16,7 @@ services:
           - note-loopback
   note-java:
     build: ./note-java
+    image: raymondfeng/note-java
     ports:
       - "50052:50052"
     links:
@@ -24,6 +27,7 @@ services:
           - note-java
   note-swift:
       build: ./note-swift
+      image: raymondfeng/note-swift
       ports:
         - "50053:50053"
       links:
@@ -40,6 +44,18 @@ services:
       app-net:
         aliases:
           - zipkin
+  note-mongo:
+      image: mongo:latest
+      volumes:
+            - mongo-data-volume:/data/db
+      ports:
+        - "27017:27017"
+      networks:
+        app-net:
+          aliases:
+            - note-mongo
 networks:
   app-net:
     driver: bridge
+volumes:
+  mongo-data-volume:

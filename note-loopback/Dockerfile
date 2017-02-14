@@ -1,4 +1,4 @@
-FROM node:6.6
+FROM node:6.9
 
 # Create app directory
 RUN mkdir -p /usr/src/note-loopback

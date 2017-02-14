@@ -3,6 +3,13 @@
     "name": "db",
     "connector": "memory"
   },
+  "note-mongo": {
+    "name": "note-mongo",
+    "host": "note-mongo",
+    "port": 27017,
+    "database": "notedb",
+    "connector": "mongodb"
+  },
   "grpc-encryption": {
     "url": "note-java:50052",
     "name": "grpc-encryption",

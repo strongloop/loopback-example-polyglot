@@ -15,6 +15,7 @@ using [LoopBack](http://loopback.io) and [gRPC](http://grpc.io).
 - note-loopback (Node.js)
 - note-java (Java)
 - note-swift (Swift)
+- note-mongo (MongoDB)
 - openzipkin/zipkin ([zipkin](http://zipkin.io/))
 
 # Running with docker-compose
