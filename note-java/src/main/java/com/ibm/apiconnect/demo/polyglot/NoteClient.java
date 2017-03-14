@@ -57,8 +57,9 @@ public class NoteClient {
 		BraveUtil.shutdown();
 	}
 
-	public Note create() {
-		Note request = Note.newBuilder().setTitle("Note1").setContent("My Note").build();
+	public Note create(int id) {
+		Note request = Note.newBuilder().setId(id)
+		    .setTitle("Note" + id).setContent("My Note: " + id).build();
 		try {
 			Note response = noteServiceStub.create(request);
 			logger.info("Note created: " + response);
@@ -76,7 +77,11 @@ public class NoteClient {
 	public static void main(String[] args) throws Exception {
 		NoteClient client = new NoteClient("note-loopback", 50051, "note-java", 50052);
 		try {
-			Note note = client.create();
+		    int id = 1;
+		    if (args.length >= 1) {
+		        id = Integer.parseInt(args[0]);
+		    }
+			Note note = client.create(id);
 			System.out.println("Created: " + note);
 			if (note != null) {
 				if (note.getContent().equals("My Note")) {
