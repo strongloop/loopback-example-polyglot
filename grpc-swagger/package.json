@@ -9,13 +9,13 @@
   "author": "Raymond Feng",
   "license": "MIT",
   "dependencies": {
-    "debug": "^2.2.0",
-    "js-yaml": "^3.6.1",
-    "protobufjs": "^5.0.1",
+    "debug": "^2.6.3",
+    "js-yaml": "^3.8.2",
+    "protobufjs": "^6.6.5",
     "swagger-parser": "^3.4.1"
   },
   "devDependencies": {
     "chai": "^3.5.0",
-    "mocha": "^3.0.2"
+    "mocha": "^3.2.0"
   }
 }
