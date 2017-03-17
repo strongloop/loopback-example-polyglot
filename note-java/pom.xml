@@ -8,13 +8,13 @@
 	<name>note</name>
 	<url>http://maven.apache.org</url>
 	<properties>
-		<grpc.version>1.0.0</grpc.version><!-- CURRENT_GRPC_VERSION -->
+		<grpc.version>1.2.0</grpc.version><!-- CURRENT_GRPC_VERSION -->
 	</properties>
 	<dependencies>
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>3.8.1</version>
+			<version>4.11</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -66,7 +66,7 @@
 		<dependency>
 			<groupId>io.netty</groupId>
 			<artifactId>netty-tcnative-boringssl-static</artifactId>
-			<version>1.1.33.Fork22</version>
+			<version>1.1.33.Fork26</version>
 			<classifier>${os.detected.classifier}</classifier>
 		</dependency>
 	</dependencies>
