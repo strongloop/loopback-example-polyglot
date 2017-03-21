@@ -11,12 +11,16 @@ using [LoopBack](http://loopback.io) and [gRPC](http://grpc.io).
   - grpc-swagger: Generate swagger spec from gRPC proto document and vice versa
   - [loopback-connector-grpc](https://github.com/strongloop/loopback-connector-grpc): LoopBack connector for gRPC services
 
+![Demo](docs/demo.png)
+
 # Docker Containerization
 - note-loopback (Node.js)
 - note-java (Java)
 - note-swift (Swift)
 - note-mongo (MongoDB)
 - openzipkin/zipkin ([zipkin](http://zipkin.io/))
+
+![DockerCompose](docs/docker-compose.png)
 
 # Running with docker-compose
 
@@ -45,7 +49,9 @@ $ java -cp ./target/note-1.0.0.jar com.ibm.apiconnect.demo.polyglot.NoteClient
  
 Please follow instructions at https://github.com/kubernetes/minikube to install `minikube` and `kubectl` commands.
 
-````
+```
 cd kubernetes
 ./create-k8s.sh
 ```
+
+![k8s](docs/k8s.png)
