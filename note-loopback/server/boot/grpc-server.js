@@ -34,7 +34,9 @@ module.exports = function(app) {
     app.models.Note.find(filter, options, function(err, values) {
       callback(err, {
         notes: values.map(function(v) {
-          return v.toJSON();
+          var obj = v.toJSON();
+          obj.id = parseInt(obj.id);
+          return obj;
         })
       });
     });

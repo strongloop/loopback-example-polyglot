@@ -15,11 +15,13 @@ function main() {
   var ssl = grpc.credentials.createSsl(rootCerts);
 
   var encryptionClient = new proto.note.NoteService('localhost:50052', ssl);
+  var id = parseInt(process.argv[2]) || 1;
 
   zipkinAgent.traceClient('note-loopback-client',
     {zipkinServerUrl: 'http://localhost:9411'}, {},
     function(metadata, done) {
       var note = {
+        id: id,
         title: 'note1',
         content: 'my note'
       };
