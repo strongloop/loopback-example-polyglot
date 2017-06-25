@@ -1,3 +1,5 @@
+'use strict';
+
 module.exports = function(app) {
   var path = require('path');
   var PROTO_PATH = path.join(__dirname, '../../proto/note.proto');
@@ -37,7 +39,7 @@ module.exports = function(app) {
           var obj = v.toJSON();
           obj.id = parseInt(obj.id);
           return obj;
-        })
+        }),
       });
     });
   }
@@ -57,12 +59,11 @@ module.exports = function(app) {
 
     var zipkinFactory = zipkinAgent.serverInterceptorFactory(
       {zipkinServerUrl: zipkinServerUrl});
-    server.addProtoService(proto.note.NoteService.service, {
-        create: zipkinFactory('note-loopback.create', create),
-        findById: zipkinFactory('note-loopback.findById', findById),
-        find: zipkinFactory('note-loopback.find', find)
-      }
-    );
+    server.addService(proto.note.NoteService.service, {
+      create: zipkinFactory('note-loopback.create', create),
+      findById: zipkinFactory('note-loopback.findById', findById),
+      find: zipkinFactory('note-loopback.find', find),
+    });
 
     server.bind(address, grpc.ServerCredentials.createInsecure());
     server.start();

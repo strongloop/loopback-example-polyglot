@@ -9,25 +9,25 @@
   },
   "dependencies": {
     "compression": "^1.6.2",
-    "cors": "^2.8.1",
-    "grpc": "^1.1.1",
-    "helmet": "^3.4.0",
-    "loopback": "^3.2.1",
-    "loopback-boot": "^2.23.0",
-    "loopback-component-explorer": "^4.1.0",
+    "cors": "^2.8.3",
+    "grpc": "^1.3.9",
+    "helmet": "^3.6.1",
+    "loopback": "^3.8.0",
+    "loopback-boot": "^2.24.1",
+    "loopback-component-explorer": "^4.2.0",
     "loopback-connector-grpc": "github:strongloop/loopback-connector-grpc",
-    "loopback-connector-mongodb": "^3.0.1",
-    "loopback-datasource-juggler": "^3.2.0",
-    "serve-favicon": "^2.3.2",
-    "strong-error-handler": "^1.2.1",
-    "zipkin": "^0.5.1",
-    "zipkin-instrumentation-express": "^0.5.1",
-    "zipkin-transport-http": "^0.5.1"
+    "loopback-connector-mongodb": "^3.1.0",
+    "loopback-datasource-juggler": "^3.9.2",
+    "serve-favicon": "^2.4.3",
+    "strong-error-handler": "^2.1.0",
+    "zipkin": "^0.7.1",
+    "zipkin-instrumentation-express": "^0.7.1",
+    "zipkin-transport-http": "^0.7.1"
   },
   "devDependencies": {
     "eslint": "^3.15.0",
     "eslint-config-loopback": "^8.0.0",
-    "nsp": "^2.6.2"
+    "nsp": "^2.6.3"
   },
   "repository": {
     "type": "",
