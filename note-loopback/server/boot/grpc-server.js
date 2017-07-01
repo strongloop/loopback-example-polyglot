@@ -7,8 +7,6 @@ module.exports = function(app) {
   var grpc = require('grpc');
   var proto = grpc.load(PROTO_PATH);
 
-  var zipkinAgent = require('../../lib/zipkin-agent');
-
   /**
    * Implements the SayHello RPC method.
    */
@@ -55,14 +53,11 @@ module.exports = function(app) {
     var host = grpcConfig.host || '0.0.0.0';
     var port = grpcConfig.port || 50051;
     var address = host + ':' + port;
-    var zipkinServerUrl = grpcConfig.zipkinServerUrl || 'http://localhost:9411';
 
-    var zipkinFactory = zipkinAgent.serverInterceptorFactory(
-      {zipkinServerUrl: zipkinServerUrl});
     server.addService(proto.note.NoteService.service, {
-      create: zipkinFactory('note-loopback.create', create),
-      findById: zipkinFactory('note-loopback.findById', findById),
-      find: zipkinFactory('note-loopback.find', find),
+      create: create,
+      findById: findById,
+      find: find,
     });
 
     server.bind(address, grpc.ServerCredentials.createInsecure());

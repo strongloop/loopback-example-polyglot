@@ -1,16 +1,11 @@
 package com.ibm.apiconnect.demo.polyglot;
 
-import static com.ibm.apiconnect.demo.polyglot.BraveUtil.ZIPKIN_SERVER_URL;
-import static com.ibm.apiconnect.demo.polyglot.BraveUtil.brave;
-
 import java.io.InputStream;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.net.ssl.SSLException;
-
-import com.github.kristofa.brave.grpc.BraveGrpcClientInterceptor;
 
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
@@ -35,13 +30,11 @@ public class NoteClient {
 	public NoteClient(String noteHost, int notePort, String encryptionHost, int encryptionPort) throws SSLException {
 		InputStream keyCertChainInputStream = NoteClient.class.getResourceAsStream("/grpc.crt");
 		noteChannel = ManagedChannelBuilder.forAddress(noteHost, notePort)
-				.intercept(new BraveGrpcClientInterceptor(brave("note-client", ZIPKIN_SERVER_URL)))
 				// Channels are secure by default (via SSL/TLS). For the example
 				// we disable TLS to avoid
 				// needing certificates.
 				.usePlaintext(true).build();
 		encryptionChannel = NettyChannelBuilder.forAddress(encryptionHost, encryptionPort)
-				.intercept(new BraveGrpcClientInterceptor(brave("encryption-client", ZIPKIN_SERVER_URL)))
 				// Channels are secure by default (via SSL/TLS). For the example
 				// we disable TLS to avoid
 				// needing certificates.
@@ -54,7 +47,6 @@ public class NoteClient {
 	public void shutdown() throws InterruptedException {
 		noteChannel.shutdown().awaitTermination(5, TimeUnit.SECONDS);
 		encryptionChannel.shutdown().awaitTermination(5, TimeUnit.SECONDS);
-		BraveUtil.shutdown();
 	}
 
 	public Note create(int id) {

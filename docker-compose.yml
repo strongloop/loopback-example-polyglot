@@ -2,48 +2,35 @@ version: '3'
 services:
   note-loopback:
     build: ./note-loopback
-    image: raymondfeng/note-loopback
+    image: raymondfeng/note-loopback:istio
     ports:
       - "50051:50051"
       - "3000:3000"
     links:
       - note-java
       - note-mongo
-      - zipkin
     networks:
       app-net:
         aliases:
           - note-loopback
   note-java:
     build: ./note-java
-    image: raymondfeng/note-java
+    image: raymondfeng/note-java:istio
     ports:
       - "50052:50052"
-    links:
-      - zipkin
     networks:
       app-net:
         aliases:
           - note-java
   note-swift:
       build: ./note-swift
-      image: raymondfeng/note-swift
+      image: raymondfeng/note-swift:istio
       ports:
         - "50053:50053"
-      links:
-        - zipkin
       networks:
         app-net:
           aliases:
             - note-swift
-  zipkin:
-    image: openzipkin/zipkin
-    ports:
-      - "9411:9411"
-    networks:
-      app-net:
-        aliases:
-          - zipkin
   note-mongo:
       image: mongo:latest
       volumes:

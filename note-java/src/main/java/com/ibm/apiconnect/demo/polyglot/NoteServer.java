@@ -24,13 +24,12 @@ import io.netty.handler.ssl.SslContextBuilder;
 public class NoteServer {
 
 	public NoteServer() {
-		this(50052, BraveUtil.ZIPKIN_SERVER_URL);
+		this(50052);
 	}
 
-	public NoteServer(int port, String zipkinServerUrl) {
+	public NoteServer(int port) {
 		super();
 		this.port = port;
-		this.zipkinServerUrl = zipkinServerUrl;
 	}
 
 	private static final Logger logger = Logger.getLogger(NoteServer.class.getName());
@@ -38,7 +37,6 @@ public class NoteServer {
 	/* The port on which the server should run */
 	private int port = 50052;
 
-	private String zipkinServerUrl = BraveUtil.ZIPKIN_SERVER_URL;
 	private Server server;
 	private RSAPrivateKey privateKey;
 	private RSAPublicKey publicKey;
@@ -47,10 +45,8 @@ public class NoteServer {
 		this.privateKey = JWEUtil.loadPrivateKey();
 		this.publicKey = JWEUtil.loadPublicKey();
 		// Please note that Brave does NOT create a child span at the moment
-		ServerServiceDefinition noteService = BraveUtil.intercept(new NoteServiceImpl(), "note-service",
-				zipkinServerUrl);
-		ServerServiceDefinition encryptionService = BraveUtil.intercept(new EncryptioneServiceImpl(),
-				"encryption-service", zipkinServerUrl);
+		ServerServiceDefinition noteService = new NoteServiceImpl().bindService();
+		ServerServiceDefinition encryptionService = new EncryptioneServiceImpl().bindService();
 		SslContext sslContext = configureSSLContext();
 		server = NettyServerBuilder.forPort(port).sslContext(sslContext).addService(noteService)
 				.addService(encryptionService).build().start();
@@ -84,7 +80,6 @@ public class NoteServer {
 	private void stop() {
 		if (server != null) {
 			server.shutdown();
-			BraveUtil.shutdown();
 		}
 	}
 

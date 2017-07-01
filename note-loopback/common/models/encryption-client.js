@@ -1,5 +1,5 @@
 'use strict';
 
-module.exports = function(Encryptionclient) {
+module.exports = function(EncryptionClient) {
 
 };
