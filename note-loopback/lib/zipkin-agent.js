@@ -1,3 +1,6 @@
+// Copyright Owner 2016,2017. All Rights Reserved.
+// Node module: 
+
 var zipkin = require('zipkin');
 const {
   ExplicitContext,

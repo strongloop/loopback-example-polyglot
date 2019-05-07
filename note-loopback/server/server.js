@@ -1,3 +1,6 @@
+// Copyright Owner 2016. All Rights Reserved.
+// Node module: 
+
 'use strict';
 
 var loopback = require('loopback');

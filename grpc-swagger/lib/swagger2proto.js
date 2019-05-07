@@ -1,3 +1,6 @@
+// Copyright Owner 2016,2017. All Rights Reserved.
+// Node module: 
+
 var swaggerParser = require('swagger-parser');
 var debug = require('debug')('grpc:swagger');
 var ProtoBuf = require('protobufjs');

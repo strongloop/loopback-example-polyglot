@@ -1,3 +1,6 @@
+// Copyright Owner 2016,2017. All Rights Reserved.
+// Node module: 
+
 var path = require('path');
 var proto2swagger = require('../index').proto2swagger;
 

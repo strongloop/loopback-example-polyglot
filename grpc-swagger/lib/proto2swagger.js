@@ -1,3 +1,6 @@
+// Copyright Owner 2016,2017. All Rights Reserved.
+// Node module: 
+
 var ProtoBuf = require("protobufjs");
 var proto2json = require('protobufjs/cli/targets/json');
 var debug = require('debug')('grpc:swagger');
