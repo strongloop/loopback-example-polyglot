@@ -1,5 +1,5 @@
-// Copyright Owner 2016. All Rights Reserved.
-// Node module: 
+// Copyright IBM Corp. 2016. All Rights Reserved.
+// Node module: note-loopback
 
 'use strict';
 

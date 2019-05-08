@@ -1,5 +1,5 @@
-// Copyright Owner 2016,2017. All Rights Reserved.
-// Node module: 
+// Copyright IBM Corp. 2016,2017. All Rights Reserved.
+// Node module: grpc-swagger
 
 var ProtoBuf = require("protobufjs");
 var proto2json = require('protobufjs/cli/targets/json');
