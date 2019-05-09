@@ -1,3 +1,6 @@
+// Copyright IBM Corp. 2016,2017. All Rights Reserved.
+// Node module: grpc-swagger
+
 var path = require('path');
 var proto2swagger = require('../index').proto2swagger;
 

@@ -1,3 +1,6 @@
+// Copyright IBM Corp. 2016,2017. All Rights Reserved.
+// Node module: note-loopback
+
 var path = require('path');
 var PROTO_PATH = path.join(__dirname, './proto/note.proto');
 

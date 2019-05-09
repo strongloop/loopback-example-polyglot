@@ -1,3 +1,6 @@
+// Copyright IBM Corp. 2016,2017. All Rights Reserved.
+// Node module: note-loopback
+
 module.exports = function(Note) {
   var fs = require('fs');
 
