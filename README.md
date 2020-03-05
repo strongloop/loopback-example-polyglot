@@ -1,4 +1,7 @@
 # loopback-example-polyglot
+
+**⚠️ This LoopBack 3 example project is no longer maintained. Please refer to [LoopBack 4 Examples](https://loopback.io/doc/en/lb4/Examples.html) instead. ⚠️**
+
 PoC project to illustrate how to create polyglot APIs and Microservices
 using [LoopBack](http://loopback.io) and [gRPC](http://grpc.io).
 
